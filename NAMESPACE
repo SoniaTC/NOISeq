@@ -1,0 +1,9 @@
+import(Biobase)
+
+export("noiseq","readData","addData","dat",
+	"rpkm","tmm","uqua","degenes",
+	"DE.plot")
+
+exportClasses("Output","Biodetection","CD","CountsBio","DLBio","Saturation")
+exportMethods("show", "explo.plot")
+
