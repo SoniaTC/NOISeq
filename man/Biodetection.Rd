@@ -3,6 +3,7 @@
 \alias{Biodetection}
 \alias{show,Biodetection-method}
 \alias{explo.plot,Biodetection-method}
+\alias{dat2save,Biodetection-method}
 \docType{class}
 \title{Biodetection class}
 
@@ -14,6 +15,7 @@ and the percentage of the biotype within the sample.
 
 \usage{
 \S4method{explo.plot}{Biodetection}(object)
+\S4method{dat2save}{Biodetection}(object)
 }
 
 \arguments{
@@ -37,7 +39,8 @@ Objects of this class contain (at least) the following list components:
 
 \section{Methods}{
 This class has an specific \code{show} method in order to work and print
-a summary of the elements which are contained. It also has an
+a summary of the elements which are contained and a \code{dat2save} method
+to save the relevant information in an object cleanly. It also has an
 \code{explo.plot} method to plot the data contained in the object.
 }
 

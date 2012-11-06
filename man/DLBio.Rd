@@ -2,6 +2,8 @@
 \alias{DLBio-class}
 \alias{DLBio}
 \alias{explo.plot,DLBio-method}
+\alias{show,DLBio-method}
+\alias{dat2save,DLBio-method}
 \docType{class}
 \title{DLBio class}
 
@@ -12,6 +14,7 @@ at increasing sequencing depths.
 
 \usage{
 \S4method{explo.plot}{DLBio}(object, samples = NULL, toplot = "protein_coding",ylim = NULL)
+\S4method{dat2save}{DLBio}(object)
 }
 
 \arguments{
@@ -49,7 +52,9 @@ Objects of this class contain (at least) the following list components:
 
 \section{Methods}{
 This class has an specific \code{show} method in order to work and print
-a summary of the elements which are contained.
+a summary of the elements which are contained and a \code{dat2save} method
+to save the relevant information in an object cleanly. It also has an
+\code{explo.plot} method to plot the data contained in the object.
 }
 
 \author{Sonia Tarazona}

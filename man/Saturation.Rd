@@ -2,6 +2,8 @@
 \alias{Saturation-class}
 \alias{Saturation}
 \alias{explo.plot,Saturation-method}
+\alias{show,Saturation-method}
+\alias{dat2save,Saturation-method}
 \docType{class}
 \title{Saturation class}
 
@@ -12,6 +14,7 @@ increasing sequencing depths and also the new detections when increasing the seq
 
 \usage{
 \S4method{explo.plot}{Saturation}(object, toplot = 1, samples = NULL,ylim = NULL, yrightlim = NULL)
+\S4method{dat2save}{Saturation}(object)
 }
 
 \arguments{
@@ -55,7 +58,9 @@ Objects of this class contain (at least) the following list components:
 
 \section{Methods}{
 This class has an specific \code{show} method in order to work and print
-a summary of the elements which are contained. 
+a summary of the elements which are contained and a \code{dat2save} method
+to save the relevant information in an object cleanly. It also has an
+\code{explo.plot} method to plot the data contained in the object.
 }
 
 \author{Sonia Tarazona}

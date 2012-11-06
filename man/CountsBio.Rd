@@ -3,6 +3,7 @@
 \alias{CountsBio}
 \alias{show,CountsBio-method}
 \alias{explo.plot,CountsBio-method}
+\alias{dat2save,CountsBio-method}
 \docType{class}
 \title{CountsBio class}
 
@@ -13,6 +14,7 @@ type="countsbio". This object contains the count distribution for each biologica
 
 \usage{
 \S4method{explo.plot}{CountsBio}(object, toplot = 1, samples = NULL, ylim = NULL)
+\S4method{dat2save}{CountsBio}(object)
 }
 
 \arguments{
@@ -53,7 +55,8 @@ Objects of this class contain (at least) the following list components:
 
 \section{Methods}{
 This class has an specific \code{show} method in order to work and print
-a summary of the elements which are contained. It also has an
+a summary of the elements which are contained and a \code{dat2save} method
+to save the relevant information in an object cleanly. It also has an
 \code{explo.plot} method to plot the data contained in the object.
 }
 

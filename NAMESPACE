@@ -5,5 +5,5 @@ export("noiseq","readData","addData","dat",
 	"DE.plot")
 
 exportClasses("Output","Biodetection","CD","CountsBio","DLBio","Saturation")
-exportMethods("show", "explo.plot")
+exportMethods("show", "explo.plot","dat2save")
 

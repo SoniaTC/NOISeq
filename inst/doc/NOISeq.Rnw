@@ -1,25 +1,27 @@
-\documentclass[12pt]{article}
-
-\topmargin 0in
-\headheight 0in
-\headsep 0in
-\oddsidemargin 0in
-\evensidemargin 0in
-\textwidth 176mm
-\textheight 215mm
+\documentclass[10pt]{article}
+\usepackage[a4paper,left=1.9cm,top=1.9cm,bottom=2.5cm,right=1.9cm,ignoreheadfoot]{geometry}
+\usepackage{cite}
+%\topmargin 0in
+%\headheight 0in
+%\headsep 0in
+%\oddsidemargin 0in
+%\evensidemargin 0in
+%\textwidth 176mm
+%\textheight 215mm
 \usepackage[numbers]{natbib}
 \usepackage{Sweave}
+\SweaveOpts{keep.source=FALSE,eps=FALSE,pdf=TRUE,png=FALSE,include=FALSE,concordance=TRUE}
 \usepackage{url}
 \usepackage[utf8]{inputenc}
-\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+%\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
 \newcommand{\noiseq}{\textsf{NOISeq}}
 \newcommand{\code}[1]{{\small\texttt{#1}}}
 \newcommand{\R}{\textsf{R}}
 
-
 \begin{document}
 
 %\VignetteIndexEntry{NOISeq User's Guide}
+
 
 \title{\noiseq: Differential Expression in \textsf{RNA-seq}}
 \author{Sonia Tarazona (\texttt{starazona@cipf.es})\\Pedro Furió-Tarí (\texttt{pfurio@cipf.es})\\Alberto Ferrer (\texttt{aferrer@eio.upv.es})\\Ana Conesa (\texttt{aconesa@cipf.es})}
@@ -32,6 +34,10 @@
 \tableofcontents
 
 \clearpage
+
+<<options,results=hide,echo=FALSE>>=
+options(digits=3, width=95)
+@
 
 \section{Introduction}
 
@@ -83,11 +89,10 @@ Factors are given in a data.frame object like follows. For Marioni's data, we ob
 Be careful here, the order of the levels of the factor must coincide with the order of the samples in the expression data file provided.
 
 <<factors>>=
-myfactors = data.frame(Tissue=c("Kidney","Liver","Kidney","Liver","Liver",
-                                "Kidney","Liver","Kidney","Liver","Kidney"),
-                       TissueRun = c("Kidney_1","Liver_1","Kidney_1","Liver_1",
-                                     "Liver_1","Kidney_1","Liver_1","Kidney_2",
-                                     "Liver_2","Kidney_2"))
+myfactors = data.frame(Tissue=c("Kidney","Liver","Kidney","Liver","Liver","Kidney","Liver",
+                                "Kidney","Liver","Kidney"),
+                       TissueRun = c("Kidney_1","Liver_1","Kidney_1","Liver_1","Liver_1",
+                                     "Kidney_1","Liver_1","Kidney_2","Liver_2","Kidney_2"))
 @ 
 
 
@@ -181,23 +186,19 @@ In the following sections you will find more details about each type of explorat
 When the biological classification of the features is provided (e.g. biotypes), a bar diagram can be obtained that shows the percentage of each biotype in the genome (i.e. in the whole set of features provided), which proportion has been detected in our sample (with number of counts higher than \texttt{k}) and the percentage of each biotype within the sample.
 
 This is an example on how to use the corresponding functions, first to generate the data to be plotted and then to draw the plot. In this case, samples in columns 1 and 2 from expression data are plotted and the features (genes) are considered to be detected if having a number of counts higher than k=0:
-<<biodetection>>=
+<<fig_biodetection,fig=TRUE,width=12>>=
 mybiodetection <- dat(mydata, selection=c(1,2), k = 0, type = "biodetection")
 explo.plot(mybiodetection)
 @ 
 
 Fig. \ref{fig_biodetection} shows the plot that would be generated. The vertical green line separates the most abundant biotypes (in the left-hand side, corresponding to the left axis scale) from the rest (in the right-hand side, corresponding to the right axis scale).
 
-\begin{figure}[!h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.9\textwidth]{img/biodetection.pdf}
+\includegraphics[width=0.9\textwidth]{NOISeq-fig_biodetection}
 \caption{Biodetection plot}
 \label{fig_biodetection}
 \end{figure}
-
-
-%% dat2save
-
 
 % \clearpage
 
@@ -205,14 +206,14 @@ Fig. \ref{fig_biodetection} shows the plot that would be generated. The vertical
 
 This plot is to check if the distribution of the counts is the same for two given conditions, which would be desirable in order to compute differential expression between them. See an usage example below to compare samples 1 and 2, and the result in Fig. \ref{fig_countdistr}:
 
-<<countDistribution>>=
+<<fig_countdistr,fig=TRUE>>=
 mycd = dat(mydata, selection=c(1,2), type = "cd")
 explo.plot(mycd)
 @ 
 
-\begin{figure}[!h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.5\textwidth]{img/countdistr.pdf}
+\includegraphics[width=0.5\textwidth]{NOISeq-fig_countdistr}
 \caption{Count distribution plot}
 \label{fig_countdistr}
 \end{figure}
@@ -230,14 +231,14 @@ With this plot, and providing that we have a biological classification for the f
 
 The following code generates the data for a plot of type "countsbio" from all the samples (as \code{selection} parameter is NULL the results are computed for all the samples). The \code{ndepth} parameter is indicating that the distribution of counts will be computed at 5 increasing sequencing depths. The last one will be the real sequencing depth and the rest of them will be simulated by sampling from the total number of reads according the multinomial probability distribution. With \emph{explo.plot}, a plot is generated that shows the distribution of counts per biotype for samples 1 and 2 and for all the biotypes (because \code{toplot} parameter is 1) as the one in Fig. \ref{fig_boxplot1}.
 
-<<countsbio>>=
+<<fig_boxplot1,fig=TRUE,width=14>>=
 mycountsbio = dat(mydata, selection = NULL, k = 0, ndepth = 5, type = "countsbio")
 explo.plot(mycountsbio, toplot = 1, samples = c(1,2), ylim = c(0,200))
 @ 
 
-\begin{figure}[!h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=\textwidth]{img/counts_boxplot_1.pdf}
+\includegraphics[width=\textwidth]{NOISeq-fig_boxplot1}
 \caption{Count distribution per biotype in two samples (for genes with more than 0 counts). At the upper part of the plot, the number of detected features within each biotype group is displayed.}
 \label{fig_boxplot1}
 \end{figure}
@@ -245,13 +246,13 @@ explo.plot(mycountsbio, toplot = 1, samples = c(1,2), ylim = c(0,200))
 
 To see how the distribution of counts changes when increasing sequencing depth, the following code will generate the example in Fig. \ref{fig_boxplot2} for the biotype "protein\_coding" and the sample number 5.
 
-<<plotcountsbio>>=
+<<fig_boxplot2,fig=TRUE>>=
 explo.plot(mycountsbio, toplot = "protein_coding", samples = 5, ylim = c(0,200))
 @ 
 
-\begin{figure}[!h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.45\textwidth]{img/counts_boxplot_2.pdf}
+\includegraphics[width=0.45\textwidth]{NOISeq-fig_boxplot2}
 \caption{Distribution of counts for protein coding genes in one of the samples when increasing sequencing depth.}
 \label{fig_boxplot2}
 \end{figure}
@@ -262,16 +263,17 @@ explo.plot(mycountsbio, toplot = "protein_coding", samples = 5, ylim = c(0,200))
 
 \subsection{Length of detected features}
 
-The plot in Fig. \ref{fig_length} is to describe the median length of detected features within each sample and per biotype when increasing sequencing depth. In this example, we plotted 4 samples (from 3 to 6) and the "protein\_coding" biotype. First we compute the values for all the samples and biotypes and then we plot the chosen samples and/or biotypes.
+The plot in Fig. \ref{fig_length} is to describe the median length of detected features within each sample and per biotype when increasing sequencing depth. In this example, 
+we plotted 4 samples (from 3 to 6) and the "protein\_coding" biotype. First we compute the values for all the samples and biotypes and then we plot the chosen samples and/or biotypes.
 
-<<dlbio>>=
+<<fig_length,fig=TRUE>>=
 myDLbio = dat(mydata, selection = NULL, k = 0, ndepth = 5, type = "DLbio")
 explo.plot(myDLbio, samples = 3:6, toplot = "protein_coding")
 @ 
 
-\begin{figure}[!h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.6\textwidth]{img/length.pdf}
+\includegraphics[width=0.6\textwidth]{NOISeq-fig_length}
 \caption{Median length of detected features at increasing sequencing depths.}
 \label{fig_length}
 \end{figure}
@@ -283,15 +285,22 @@ explo.plot(myDLbio, samples = 3:6, toplot = "protein_coding")
 
 \subsection{Saturation plots}
 
-Sometimes, it is interesting to know how many of the features in the genome we are detecting with more than a given number of counts (e.g. k=5). If we can see how this number of detected features changes when increasing sequencing depth, it may give us an idea about the saturation in our sample: should we increase our sequencing depth or if we increase it we are not detecting many more new features? The saturation plots allow you to study this phenomenon for each biotypes (if you provide them) or for all the genes in general.
+Sometimes, it is interesting to know how many of the features in the genome we are detecting with more than a given number of counts (e.g. k=5). 
+If we can see how this number of detected features changes when increasing sequencing depth, it may give us an idea about the saturation in our sample: 
+should we increase our sequencing depth or if we increase it we are not detecting many more new features? 
+The saturation plots allow you to study this phenomenon for each biotypes (if you provide them) or for all the genes in general.
 
-First, we have to generate the saturation data with the function \code{dat} and then we can use the resulting data to obtain, for instance, the plots in Fig. \ref{fig_sat1} and \ref{fig_sat2} by using \emph{explo.plot}. When \code{newdetections} parameter is set to TRUE, a right axis and bars are drawn to show the number of new features detected when increasing the sequencing depth in one million of reads. If more than 2 samples are to be plotted, this parameter is automatically set to FALSE because it is difficult to visualize the newdetection bars with so many samples.
+First, we have to generate the saturation data with the function \code{dat} and then we can use the resulting data to obtain, 
+for instance, the plots in Fig. \ref{fig_sat1} and \ref{fig_sat2} by using \emph{explo.plot}. When \code{newdetections} parameter is set to TRUE, 
+a right axis and bars are drawn to show the number of new features detected when increasing the sequencing depth in one million of reads. 
+If more than 2 samples are to be plotted, this parameter is automatically set to FALSE because it is difficult to visualize the newdetection bars with so many samples.
 
-<<saturation>>=
+<<fig_sat1,fig=TRUE>>=
 mysaturation = dat(mydata, k = 0, ndepth = 5, newdetections = TRUE, type = "saturation")
 explo.plot(mysaturation, toplot = 1, samples = 1:2, ylim = NULL, yrightlim = NULL)
-explo.plot(mysaturation, toplot = "protein_coding", samples = 1:4,
-           ylim = NULL, yrightlim = NULL)
+@
+<<fig_sat2,fig=TRUE>>=
+explo.plot(mysaturation, toplot = "protein_coding", samples = 1:4, ylim = NULL, yrightlim = NULL)
 @ 
 
 
@@ -299,17 +308,17 @@ The plot in Fig. \ref{fig_sat1} has been computed for all the features (without 
 
 It is possible to compare more than 2 samples, but then the information in the right axis is not provided because it would be difficult to distinguish so many bars. You can compare up to twelve samples. In Fig. \ref{fig_sat2}, four samples are compared and we can see, for instance, that in kidney samples the number of detected features is higher than in liver samples.  
 
-\begin{figure}[!h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.5\textwidth]{img/saturation1.pdf}
+\includegraphics[width=0.5\textwidth]{NOISeq-fig_sat1}
 \caption{Global saturation plot to compare two samples of kidney and liver, respectively.}
 \label{fig_sat1}
 \end{figure}
 
 
-\begin{figure}[!h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.5\textwidth]{img/saturation2.pdf}
+\includegraphics[width=0.5\textwidth]{NOISeq-fig_sat2}
 \caption{Saturation plot for protein-coding genes to compare 4 samples: 2 of kidney and 2 of liver.}
 \label{fig_sat2}
 \end{figure}
@@ -523,13 +532,13 @@ Once differential expression has been computed, it is interesting to plot the ex
 
 To plot the summary of the expression values in both conditions as in Fig. \ref{fig_summ_expr}, please write the following code (many graphical parameters can be adjusted, see the function help). Note that by giving $q=0.8$, differentially expressed features considering this threshold will be highlighted in red:
 
-<<>>=
+<<fig_summ_expr,fig=TRUE>>=
 DE.plot(mynoiseq, q = 0.8, graphic = "expr", log.scale = TRUE)
 @ 
 
-\begin{figure}[!h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.6\textwidth]{img/summary_expr.pdf}
+\includegraphics[width=0.6\textwidth]{NOISeq-fig_summ_expr}
 \caption{Summary plot of the expression values for both conditions (black), where differentially expressed genes are highlighted (red).}
 \label{fig_summ_expr}
 \end{figure}
@@ -538,13 +547,13 @@ DE.plot(mynoiseq, q = 0.8, graphic = "expr", log.scale = TRUE)
 \subsubsection{$(M,D)$ plot}
 Instead of plotting the expression values, one may be interested in plotting the $(M,D)$ values as in Fig. \ref{fig_summ_MD}. This is an example of the code to get such a plot (in this case we have zoomed to see the only the genes with $D$ values smaller than 50):
 
-<<>>=
+<<fig_summ_MD,fig=TRUE>>=
 DE.plot(mynoiseq, q = 0.8, graphic = "MD", ylim = c(0,50))
 @ 
 
-\begin{figure}[!h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.6\textwidth]{img/summary_MD.pdf}
+\includegraphics[width=0.6\textwidth]{NOISeq-fig_summ_MD}
 \caption{Summary plot for (M,D) values (black) and the differentially expressed genes (red).}
 \label{fig_summ_MD}
 \end{figure}
@@ -556,15 +565,15 @@ The Manhattan plot can be used to display the features expression across the chr
 
 The following code shows how to draw the Manhattan plot from the output object returned by \code{NOISeq}. In this case, using Marioni's data, the log-expression is represented for three chromosomes (see Fig. \ref{fig_manhattan}). Gene expression is represented in gray. Lines above 0 correspond to the first condition under comparison (kidney) and lines below 0 are for the second condition (liver). Genes up-regulated in the first condition are highlighted in red, while genes up-regulated in the second condition are highlighted in green. The blue lines on the horizontal axis (Y=0) correspond to the annotated genes. X scale shows the location in the chromosome.
 
-<<>>=
+<<fig_manhattan,fig=TRUE,width=12,height=5>>=
 DE.plot(mynoiseq, chromosomes = c("I","II"), log.scale = TRUE,
         join = FALSE, q = 0.8, graphic = "chrom")
 @ 
 
 
-\begin{figure}[!h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=\textwidth]{img/manhattan.pdf}
+\includegraphics[width=\textwidth]{NOISeq-fig_manhattan}
 \caption{Manhattan plot for chromosomes I, and II}
 \label{fig_manhattan}
 \end{figure}

@@ -2,6 +2,7 @@
 \alias{CD-class}
 \alias{CD}
 \alias{show,CD-method}
+\alias{dat2save,CD-method}
 \alias{explo.plot,CD-method}
 \docType{class}
 \title{CD class}
@@ -12,6 +13,7 @@ CD class generated from dat() function with type="cd". This object contains the 
 
 \usage{
 \S4method{explo.plot}{CD}(object)
+\S4method{dat2save}{CD}(object)
 }
 
 \arguments{
@@ -30,7 +32,8 @@ Objects of this class contain (at least) the following list components:
 
 \section{Methods}{
 This class has an specific \code{show} method in order to work and print
-a summary of the elements which are contained. It also has an
+a summary of the elements which are contained and a \code{dat2save} method
+to save the relevant information in an object cleanly. It also has an
 \code{explo.plot} method to plot the data contained in the object.
 }
 
