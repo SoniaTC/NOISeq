@@ -1,30 +1,33 @@
-tmm <-
-function (datos, long = 1000, lc = 1, k = 0, refColumn = 1,
-                 logratioTrim = .3, sumTrim = 0.05, doWeighting = TRUE,
-                 Acutoff = -1e10) {
-
+tmm = function (datos, long = 1000, lc = 1, k = 0, refColumn = 1,
+                logratioTrim = .3, sumTrim = 0.05, doWeighting = TRUE,
+                Acutoff = -1e10) {
+  
   # lc: Length correction. Expression is divided by long^lc. lc can be any real number.
-
+  
   L <- long^lc
-
+  
+  total <- colSums(as.matrix(datos))
+  
   datos0 <- sinceros(datos, k)
-
+  
   if (ncol(as.matrix(datos)) > 1) {
-
-    fk <- .calcNormFactors(as.matrix(datos), refColumn = refColumn,
-                          logratioTrim = logratioTrim, sumTrim = sumTrim,
-                          doWeighting = doWeighting, Acutoff = Acutoff)
     
-    datos.norm <- (t(t(datos0)*fk)*10^3)/L
-
+    fk <- .calcNormFactors(as.matrix(datos), refColumn = refColumn,
+                           logratioTrim = logratioTrim, sumTrim = sumTrim,
+                           doWeighting = doWeighting, Acutoff = Acutoff)
+          
+    fk = fk * total
+    
+    datos.norm <- (t(t(datos0)/fk)*10^9)/L
+    
   } else {
-
+    
     datos.norm <- datos0/L
-
+    
   }
   
   na.omit(datos.norm)  
-    
+  
 }
 
 
