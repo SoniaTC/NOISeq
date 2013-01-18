@@ -87,11 +87,13 @@ function (input, k = 0.5, norm = c("rpkm","uqua","tmm","n"),
   
   resultat <- data.frame(resultat, "ranking" = ranking(resultat)$statistic)
   if (!is.null(featureData(input)@data$Length))
-    resultat <- data.frame(resultat, "length" = as.numeric(as.character(featureData(input)@data[todos,"Length"])))
+    resultat <- data.frame(resultat, "Length" = as.numeric(as.character(featureData(input)@data[todos,"Length"])))  
   if (!is.null(featureData(input)@data$Chromosome))
     resultat <- data.frame(resultat, "Chrom" = as.numeric(as.character(featureData(input)@data$Chromosome)),
                            "GeneStart" = as.numeric(as.character(featureData(input)@data$GeneStart)),
                            "GeneEnd" = as.numeric(as.character(featureData(input)@data$GeneEnd)))
+  if (!is.null(featureData(input)@data$Biotype))
+    resultat <- data.frame(resultat, "Biotype" = as.character(featureData(input)@data[todos,"Biotype"]))
   #resultat[order(resultat[,5], decreasing = TRUE),]
   
   Output(data = list(resultat), method=norm,k=miMD$k,lc=lc,factor=factor,v=v,nss=nss,pnr=pnr,

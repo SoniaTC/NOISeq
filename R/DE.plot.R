@@ -1,4 +1,4 @@
-DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom"),
+DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom","distr"),
                      pch = 20, cex = 0.5, col = 1, pch.sel = 1, cex.sel = 0.6, col.sel = 2,
                      log.scale = TRUE, chromosomes = NULL, join = FALSE,...) {
   
@@ -61,12 +61,14 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom"),
     mydata <- na.omit(mydata)
     
     colnames(mydata) <- c("chr", "start", "end", colnames(mydata)[-c(1:3)])
-    
-    mydata[,"chr"] <- as.character(as.roman(mydata[,"chr"]))
-    
+        
     if (is.null(chromosomes)) {  # todos los cromosomas
       chromosomes <- unique(mydata$chr)
+      chromosomes = sort(chromosomes)
     }
+
+    print("REMEMBER. You are plotting these chromosomes and in this order:")
+    print(chromosomes)
     
     # logarithmic scale
     if (log.scale) {
@@ -75,20 +77,17 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom"),
       } else { kk <- 0 }
       mydata[,-c(1:3)] <- log2(mydata[,-c(1:3)]+kk)
     }  
-    
-    # selecting data from chromosomes to paint
-    mydata <- mydata[which(mydata[,"chr"] %in% chromosomes),]
-    
-    # change chromosomes to roman numbers to order them well
-    allchr.roman <- as.roman(mydata$chr)
-    
-    # ordering data by chromosome and start position
-    ordenat <- mydata[order(allchr.roman, mydata[,"start"]),]
-    
-    # ordering (in roman numbers) the chromosomes to paint
-    chr.roman <- chromosomes[order(as.roman(chromosomes))]
-    
+
+    # Selecting chromosomes and ordering positions
+    ordenat = NULL
+    for (cromo in chromosomes) {
+      myselec = mydata[mydata[,"chr"] == cromo,]
+      myselec = myselec[order(myselec[,"start"]),]
+      ordenat = rbind(ordenat, myselec)
+    }  
+        
     sel.ord <- NULL
+
     if (!is.null(q)) {
       # up-regulated in first condition
       cond1 <- rownames(degenes(output,q,M="up"))
@@ -104,7 +103,7 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom"),
     
     chr.long <- aggregate(ordenat[,"end"],
                           by = list(as.character(ordenat[,"chr"])), max)
-    chr.long <- chr.long[order(as.roman(as.character(chr.long[,1]))),]
+    chr.long <- chr.long[match(chromosomes, chr.long[,1]),]
     
     
     if (join) { # si todos los cromosomas van en el mismo plot
@@ -121,7 +120,7 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom"),
       
       abline(h = 0, lty = 2, lwd = 0.5)    
       
-      for (ch in chr.roman) {
+      for (ch in chromosomes) {
         
         dat.chr <- ordenat[which(ordenat[,"chr"] == ch),]
         dat.chr[,c("start","end")] <- dat.chr[,c("start","end")] +
@@ -160,6 +159,9 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom"),
            colnames(mydata)[4:5], font = 3, adj = 0, col = 2:3)
       
       
+
+
+
       # a plot for each chromosome
     } else {    
       
@@ -195,10 +197,10 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom"),
       
       for (i in 1:num.chr) {
         
-        apintar <- ordenat[which(ordenat[,"chr"] ==  chr.roman[i]), 2:5]
+        apintar <- ordenat[which(ordenat[,"chr"] ==  chromosomes[i]), 2:5]
         
         plot(c(1,chr.long[i,2]), miylim, type = "n",
-             xlab = "", ylab = as.roman(chr.roman[i]), xaxt = "n",
+             xlab = "", ylab = chromosomes[i], xaxt = "n",
              font.lab = 2, cex.lab = 1.3)
         
         rect(xleft = apintar[,"start"], ybottom = 0, xright = apintar[,"end"],
@@ -234,9 +236,182 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom"),
       }
     }
   }
+
+
+
+  ## DEG distribution across biotypes/chromosomes
+  if (graphic == "distr") {    
+
+    if(!is.null(q)) {     # Computing DEG
+      mySelection = rownames(degenes(output,q))
+      detect = rownames(output@results[[1]]) %in% mySelection
+    } else {
+      stop("You must specify a valid value for q\n")
+    }
+      
+
+    if ("Chrom" %in% colnames(output@results[[1]])) {
+
+      numplot = 1
+
+      infobio = output@results[[1]][,"Chrom"]
+
+      genome <- 100*table(infobio)/sum(table(infobio))
+
+      ordre <- order(genome, decreasing = TRUE)      
+
+      perdet1 <- genome*table(infobio, detect)[names(genome),2] / table(infobio)[names(genome)]
+  
+      perdet2 <- 100*table(infobio, detect)[names(genome),2] / sum(table(infobio, detect)[,2])
+  
+      ceros <- rep(0, length(genome))
+  
+      biotable1 <- as.matrix(rbind(genome[ordre], perdet1[ordre], perdet2[ordre], ceros))
+      rownames(biotable1) <- c("genome", "degVSgenome", "deg", "ceros")
+
+      if (!is.null(chromosomes)) biotable1 = biotable1[,chromosomes]
+
+      ymaxL1 <- ceiling(max(biotable1, na.rm = TRUE))      
+
+    } else { numplot = 0 }
+
+
+
+    if ("Biotype" %in% colnames(output@results[[1]])) {
+
+      numplot = c(numplot, 1)
+
+      infobio = output@results[[1]][,"Biotype"]
+
+      genome <- 100*table(infobio)/sum(table(infobio))
+
+      ordre <- order(genome, decreasing = TRUE)      
+
+      perdet1 <- genome*table(infobio, detect)[names(genome),2] / table(infobio)[names(genome)]
+
+      perdet2 <- 100*table(infobio, detect)[names(genome),2] / sum(table(infobio, detect)[,2])
+  
+      ceros <- rep(0, length(genome))
+  
+      biotable2 <- as.matrix(rbind(genome[ordre], perdet1[ordre], perdet2[ordre], ceros))
+      rownames(biotable2) <- c("genome", "degVSgenome", "deg", "ceros")
+
+      ymaxL2 <- ceiling(max(biotable2[,1:3], na.rm = TRUE))
+      ymaxR2 <- ceiling(max(biotable2[,-c(1:3)], na.rm = TRUE))
+
+      biotable2[,-c(1:3)] <- biotable2[,-c(1:3)]*ymaxL2/ymaxR2
+
+    } else { numplot = c(numplot, 0) }
+
+   
+
+
+    # Plot
+    if (sum(numplot) == 0) stop("Biotype or chromosome information is needed for this plot\n")
+
+    if (sum(numplot) == 1) {  # 1 Plot 
+        
+      par(mar = c(10, 4, 2, 2))
+
+      if (numplot[1] == 1) {
+    
+	barplot(biotable1[c(1,3),], main = "DEG distribution across chromosomes",
+		xlab = NULL, ylab = "%features", axis.lty = 1, legend = FALSE,
+		beside = TRUE, col = c("grey", 2), las = 2,
+		ylim = c(0, ymaxL1), border = c("grey", 2))
+    
+	barplot(biotable1[c(2,4),], main = "DEG distribution across chromosomes",
+		xlab = NULL, ylab = "%features", axis.lty = 1, legend = FALSE,
+		beside = TRUE, col = c(2, 1), las = 2, density = 30,
+		ylim = c(0, ymaxL1), border = 2, add = TRUE)
+    
+	legend(x = "topright", bty = "n", horiz = FALSE,
+	       fill = c("grey", 2, 2), density = c(NA,30,NA),
+	       border = c("grey", 2, 2),
+	       legend = c("%Chrom in genome", "%DEG in Chrom", "%Chrom in DEG"))
+
+      }
+
+
+      if (numplot[2] == 1) {
+
+	barplot(biotable2[c(1,3),], main = "DEG distribution across biotypes",
+		xlab = NULL, ylab = "%features", axis.lty = 1, legend = FALSE,
+		beside = TRUE, col = c("grey", 4), las = 2,
+		ylim = c(0, ymaxL2), border = c("grey", 4))
+    
+	barplot(biotable2[c(2,4),], main = "DEG distribution across biotypes",
+	        xlab = NULL, ylab = "%features", axis.lty = 1, legend = FALSE,
+		beside = TRUE, col = c(4, 1), las = 2, density = 30,
+		ylim = c(0, ymaxL2), border = 4, add = TRUE)
+    
+	axis(side=4, at = pretty(c(0,ymaxL2), n = 5), 
+	     labels = round(pretty(c(0,ymaxL2), n = 5)*ymaxR2/ymaxL2, 1))
+    
+	abline(v = 9.5, col = 3, lwd = 2, lty = 2)
+    
+	legend(x = "topright", bty = "n", horiz = FALSE, 
+	       fill = c("grey", 4, 4), density = c(NA,30,NA),
+	       border = c("grey", 4, 4),
+	       legend = c("%Biotype in genome", "%DEG in Biotype", "%Biotype in DEG"))        
+      } 
+    }
+
+
+    if (sum(numplot) == 2) {  # 2 Plots 
+ 
+      par(mar = c(10, 4, 2, 2), mfrow = c(1,2))
+        
+      # Chromosomes
+      barplot(biotable1[c(1,3),], main = "DEG distribution across chromosomes",
+	      xlab = NULL, ylab = "%features", axis.lty = 1, legend = FALSE,
+	      beside = TRUE, col = c("grey", 2), las = 2,
+	      ylim = c(0, ymaxL1), border = c("grey", 2))
+    
+      barplot(biotable1[c(2,4),], main = "DEG distribution across chromosomes",
+	      xlab = NULL, ylab = "%features", axis.lty = 1, legend = FALSE,
+	      beside = TRUE, col = c(2, 1), las = 2, density = 30,
+	      ylim = c(0, ymaxL1), border = 2, add = TRUE)
+  
+      legend(x = "topright", bty = "n", horiz = FALSE,
+	     fill = c("grey", 2, 2), density = c(NA,30,NA), border = c("grey", 2, 2),
+             legend = c("%Chrom in genome", "%DEG in Chrom", "%Chrom in DEG"))
+    
+    
+      # Biotypes
+      barplot(biotable2[c(1,3),], main = "DEG distribution across biotypes",
+	      xlab = NULL, ylab = "%features", axis.lty = 1, legend = FALSE,
+	      beside = TRUE, col = c("grey", 4), las = 2,
+	      ylim = c(0, ymaxL2), border = c("grey", 4))
+    
+      barplot(biotable2[c(2,4),], main = "DEG distribution across biotypes",
+	      xlab = NULL, ylab = "%features", axis.lty = 1, legend = FALSE,
+	      beside = TRUE, col = c(4, 1), las = 2, density = 30,
+	      ylim = c(0, ymaxL2), border = 4, add = TRUE)
+    
+      axis(side=4, at = pretty(c(0,ymaxL2), n = 5), 
+	   labels = round(pretty(c(0,ymaxL2), n = 5)*ymaxR2/ymaxL2, 1))
+    
+      abline(v = 9.5, col = 3, lwd = 2, lty = 2)
+    
+      legend(x = "topright", bty = "n", horiz = FALSE, 
+	     fill = c("grey", 4, 4), density = c(NA,30,NA),
+	     border = c("grey", 4, 4),
+	     legend = c("%Biotype in genome", "%DEG in Biotype", "%Biotype in DEG"))        
+  }
+  
+  # Reset with the default values
+  par(mar = c(5, 4, 4, 4) + 0.1)
+  layout(1)
+    
+    
+  }
 }
   
-  
+
+
+
+## Auxiliar function
 mypretty <- function(x, n = 5) {
   
   mywidth <- diff(x)

@@ -491,7 +491,7 @@ myresults <- noiseq(mydata, factor = "Tissue", k = NULL, norm="n", pnr = 0.2,
 \item
   \texttt{replicates}: Type of replicates: "technical" for technical replicates and "biological" for biological ones.
 \item
-  \texttt{results}: R data frame containing the differential expression results, where each row corresponds to a feature. The columns are: Expression values for each condition to be used by \code{NOISeq} (the columns names are the levels of the factor); differential expression statistics (columns "M" and "D"); probability of differential expression ("prob"); "ranking", which is a summary statistic of "M" and "D" values equal to $-sign(M) \times \sqrt{M^2 + D^2}$, than can be used for instance in gene set enrichment analysis; "length" of each feature (if provided); chromosome where the feature is ("Chrom"), if provided; start and end position of the feature within the chromosome ("GeneStart", "GeneEnd"), if provided.
+  \texttt{results}: R data frame containing the differential expression results, where each row corresponds to a feature. The columns are: Expression values for each condition to be used by \code{NOISeq} (the columns names are the levels of the factor); differential expression statistics (columns "M" and "D"); probability of differential expression ("prob"); "ranking", which is a summary statistic of "M" and "D" values equal to $-sign(M) \times \sqrt{M^2 + D^2}$, than can be used for instance in gene set enrichment analysis; "length" of each feature (if provided); chromosome where the feature is ("Chrom"), if provided; start and end position of the feature within the chromosome ("GeneStart", "GeneEnd"), if provided; feature biotype ("Biotype"), if provided.
 \item
   \texttt{nss}: Number of samples to be simulated for each condition (only when there are not replicates available). 
 \item
@@ -536,7 +536,7 @@ To plot the summary of the expression values in both conditions as in Fig. \ref{
 DE.plot(mynoiseq, q = 0.8, graphic = "expr", log.scale = TRUE)
 @ 
 
-\begin{figure}[ht]
+\begin{figure}[ht!]
 \centering
 \includegraphics[width=0.6\textwidth]{NOISeq-fig_summ_expr}
 \caption{Summary plot of the expression values for both conditions (black), where differentially expressed genes are highlighted (red).}
@@ -551,7 +551,7 @@ Instead of plotting the expression values, one may be interested in plotting the
 DE.plot(mynoiseq, q = 0.8, graphic = "MD", ylim = c(0,50))
 @ 
 
-\begin{figure}[ht]
+\begin{figure}[ht!]
 \centering
 \includegraphics[width=0.6\textwidth]{NOISeq-fig_summ_MD}
 \caption{Summary plot for (M,D) values (black) and the differentially expressed genes (red).}
@@ -563,36 +563,63 @@ DE.plot(mynoiseq, q = 0.8, graphic = "MD", ylim = c(0,50))
 
 The Manhattan plot can be used to display the features expression across the chromosomes. Expression for the two conditions under comparison is shown in the same plot. Users may choose if plotting all the chromosomes or only some of them, and also if the chromosomes are depicted consecutively (useful for prokaryote organisms) or separately (one per line). If a $q$ cutoff is provided, then differentially expressed features are highlighted in a different color.
 
-The following code shows how to draw the Manhattan plot from the output object returned by \code{NOISeq}. In this case, using Marioni's data, the log-expression is represented for three chromosomes (see Fig. \ref{fig_manhattan}). Gene expression is represented in gray. Lines above 0 correspond to the first condition under comparison (kidney) and lines below 0 are for the second condition (liver). Genes up-regulated in the first condition are highlighted in red, while genes up-regulated in the second condition are highlighted in green. The blue lines on the horizontal axis (Y=0) correspond to the annotated genes. X scale shows the location in the chromosome.
+The following code shows how to draw the Manhattan plot from the output object returned by \code{NOISeq}. In this case, using Marioni's data, the log-expression is represented for two chromosomes (see Fig. \ref{fig_manhattan}). Note that the chromosomes will be depicted in the same order that are given to "chromosomes" parameter. 
+
+Gene expression is represented in gray. Lines above 0 correspond to the first condition under comparison (kidney) and lines below 0 are for the second condition (liver). Genes up-regulated in the first condition are highlighted in red, while genes up-regulated in the second condition are highlighted in green. The blue lines on the horizontal axis (Y=0) correspond to the annotated genes. X scale shows the location in the chromosome.
 
 <<fig_manhattan,fig=TRUE,width=12,height=5>>=
-DE.plot(mynoiseq, chromosomes = c("I","II"), log.scale = TRUE,
+DE.plot(mynoiseq, chromosomes = c(1,2), log.scale = TRUE,
         join = FALSE, q = 0.8, graphic = "chrom")
 @ 
 
 
-\begin{figure}[ht]
+\begin{figure}[ht!]
 \centering
 \includegraphics[width=\textwidth]{NOISeq-fig_manhattan}
-\caption{Manhattan plot for chromosomes I, and II}
+\caption{Manhattan plot for chromosomes 1 and 2}
 \label{fig_manhattan}
 \end{figure}
 
-When all (or many) of the chromosomes are to be plotted, it is advisable to save the figure in a file, for instance, a pdf file (as in the following code), in order to get a better visualization with the zoom.
+It is advisable, in this kind of plots, to save the figure in a file, for instance, a pdf file (as in the following code), in order to get a better visualization with the zoom.
 
 \begin{Schunk}
 \begin{Sinput}
 pdf("manhattan.pdf", width = 12, height = 50)
-DE.plot(mynoiseq, chromosomes = c("I","II"), log.scale = TRUE,
+DE.plot(mynoiseq, chromosomes = c(1,2), log.scale = TRUE,
         join = FALSE, q = 0.8)
 dev.off()
 \end{Sinput}
 \end{Schunk}
 
 
-\vspace{1cm}
 
-% \clearpage
+
+\subsubsection{Plot showing the distribution of differentially expressed features across chromosomes or biotypes}
+
+This function creates a figure with two plots if both chromosomes and biotypes information is provided. Otherwise, only a plot is depicted with either the chromosomes or biotypes (if information of any of them is available). The $q$ cutoff must be provided.
+
+Both plots are analogous. The chromosomes plot shows the percentage of features in each chromosome, the proportion of them that are differentially expressed (DEG) and the percentage of differentially expressed features in each chromosome. Users may choose plotting all the chromosomes or only some of them. The plot for biotypes can be described similarly. The only difference is that this plot has a left axis scale for the three most abundant biotypes and a right axis scale for the rest of biotypes, which are separated by a green vertical line.
+
+The following code shows how to draw the figure from the output object returned by \code{NOISeq} for the Marioni's example data. 
+
+<<fig_distrDEG,fig=TRUE,width=12,height=7>>=
+DE.plot(mynoiseq, chromosomes = NULL, q = 0.8, graphic = "distr")
+@ 
+
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=\textwidth]{NOISeq-fig_distrDEG}
+\caption{Distribution of DEG across chromosomes and biotypes for Marioni's example dataset.}
+\label{fig_distrDEG}
+\end{figure}
+
+
+
+
+\vspace{5cm}
+
+%\clearpage
 
 \section{Setup}
 

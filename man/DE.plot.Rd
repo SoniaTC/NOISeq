@@ -8,7 +8,7 @@ Plot to compare expression values for two conditions or to represent differentia
 Function to represent three possible plots: one to compare the expression values in each condition, one also to compare the expression values in each condition but according to the chromosome and position within the chromosome, and the other one with the (M,D) statistics. In all three plots, the differentially expressed features may be highlighted.
 }
 \usage{
-DE.plot(output, q = NULL, graphic = c("MD","expr","chrom"), pch = 20, cex = 0.5, col = 1, pch.sel = 1, cex.sel = 0.6, col.sel = 2,log.scale = TRUE, chromosomes = NULL, join = FALSE,...)
+DE.plot(output, q = NULL, graphic = c("MD","expr","chrom","distr"), pch = 20, cex = 0.5, col = 1, pch.sel = 1, cex.sel = 0.6, col.sel = 2,log.scale = TRUE, chromosomes = NULL, join = FALSE,...)
 }
 
 \arguments{
@@ -32,7 +32,7 @@ Graphical parameters as in any other R plot. See \code{\link{par}}. They do not 
 If TRUE, log2(data+K) values are depicted instead of the expression data in the \code{\link{Output}} object. K is an appropriate constant to avoid negative values. It does not apply for graphic="MD".
 }
   \item{chromosomes}{
-Character vector indicating the chromosomes (in roman numbers) to be plotted. If NULL, all chromosomes are plotted. It only applies for graphic="chrom".
+Character vector indicating the chromosomes to be plotted and the order in which they have to be plotted. If NULL, all chromosomes are plotted. In some cases, although all chromosomes are to be plotted, it is convenient to specify the order. It only applies for graphic="chrom" and graphic="distr".
 }
   \item{join}{
 If FALSE, each chromosome is depicted in a separate line. If TRUE, all the chromosomes are depicted in the same line, consecutively (useful for prokaryote organisms). It only applies for graphic="chrom".
@@ -56,8 +56,8 @@ data(noiseq)
 ## Third, plot the expression values for all genes and highlighting the differentially expressed genes
 DE.plot(mynoiseq, q = 0.8, graphic = "expr", log.scale = TRUE)
 DE.plot(mynoiseq, q = 0.8, graphic = "MD", ylim = c(0,50))
-DE.plot(mynoiseq, chromosomes = c("I","II"), log.scale = TRUE,join = FALSE, q = 0.8, graphic = "chrom")
-
+DE.plot(mynoiseq, chromosomes = c(1,2), log.scale = TRUE,join = FALSE, q = 0.8, graphic = "chrom")
+DE.plot(mynoiseq, chromosomes = NULL, q = 0.8, graphic = "distr")
 }
 
 
