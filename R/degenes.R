@@ -9,23 +9,23 @@ function (object, q = 0.9, M = NULL) {
 
   x <- object@results[[1]]
 
-  y <- na.omit(x[-c(1:2)])
+  y <- na.omit(x[c("M","D","prob")])
 
   if (is.null(M)) {
 
-    losdeg <- y[y[,3] > q,]
+    losdeg <- y[y[,"prob"] > q,]
     print(paste(dim(losdeg)[1], "differentially expressed features"))
 
   } else if (M == "up") {
 
-    estos <- y[y[,1] > 0,]
-    losdeg <- estos[estos[,3] > q,]
+    estos <- y[y[,"M"] > 0,]
+    losdeg <- estos[estos[,"prob"] > q,]
     print(paste(dim(losdeg)[1], "differentially expressed features (up in first condition)"))
 
   } else if (M == "down") {
 
-    estos <- y[y[,1] < 0,]
-    losdeg <- estos[estos[,3] > q,]
+    estos <- y[y[,"M"] < 0,]
+    losdeg <- estos[estos[,"prob"] > q,]
     print(paste(dim(losdeg)[1], "differentially expressed features (down in first condition)"))
 
   } else {
@@ -35,9 +35,10 @@ function (object, q = 0.9, M = NULL) {
   }
 
   # Restore the object with the same "results" structure
-  losdeg <- cbind(x[rownames(losdeg),c(1:2)],losdeg)
+#   losdeg <- cbind(x[rownames(losdeg),c(1:2)],losdeg)
+  losdeg = x[rownames(losdeg),]
 
-  losdeg[order(losdeg[,5], decreasing = TRUE),]
+  losdeg[order(losdeg[,"prob"], decreasing = TRUE),]
 
 }
 

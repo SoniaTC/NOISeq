@@ -82,14 +82,15 @@ function (input, k = 0.5, norm = c("rpkm","uqua","tmm","n"),
                          "M" = miMD$Ms, "D" = miMD$Ds, "prob" = prob)
   rownames(resultat) <- todos
 
-  colnames(resultat)[1] <- unlist(strsplit(miMD$comp," "))[1]
-  colnames(resultat)[2] <- unlist(strsplit(miMD$comp," "))[3]
+  # We change the name of the conditions to "name_mean"
+  colnames(resultat)[1] <- paste(unlist(strsplit(miMD$comp," "))[1],"mean",sep="_")
+  colnames(resultat)[2] <- paste(unlist(strsplit(miMD$comp," "))[3],"mean",sep="_")
   
   resultat <- data.frame(resultat, "ranking" = ranking(resultat)$statistic)
   if (!is.null(featureData(input)@data$Length))
     resultat <- data.frame(resultat, "Length" = as.numeric(as.character(featureData(input)@data[todos,"Length"])))  
   if (!is.null(featureData(input)@data$Chromosome))
-    resultat <- data.frame(resultat, "Chrom" = as.numeric(as.character(featureData(input)@data$Chromosome)),
+    resultat <- data.frame(resultat, "Chrom" = as.character(featureData(input)@data$Chromosome),
                            "GeneStart" = as.numeric(as.character(featureData(input)@data$GeneStart)),
                            "GeneEnd" = as.numeric(as.character(featureData(input)@data$GeneEnd)))
   if (!is.null(featureData(input)@data$Biotype))
