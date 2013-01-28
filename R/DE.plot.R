@@ -57,7 +57,7 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom","distr"),
   ## MANHATTAN PLOT
   if (graphic == "chrom") {
     
-    mydata <- cbind(output@results[[1]][,8:10],output@results[[1]][,1:2])
+    mydata <- cbind(output@results[[1]][,c("Chrom","GeneStart","GeneEnd")],output@results[[1]][,1:2])
     mydata <- na.omit(mydata)
     
     colnames(mydata) <- c("chr", "start", "end", colnames(mydata)[-c(1:3)])
@@ -295,11 +295,23 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom","distr"),
   
       biotable2 <- as.matrix(rbind(genome[ordre], perdet1[ordre], perdet2[ordre], ceros))
       rownames(biotable2) <- c("genome", "degVSgenome", "deg", "ceros")
+      
+      higher2 = which(biotable2[1,] > 2)
+      lower2 = which(biotable2[1,] <= 2)
+      
+      if (length(higher2) > 0) {        
+        ymaxL2 <- ceiling(max(biotable2[,higher2], na.rm = TRUE)) 
+        if (length(lower2) > 0) {
+          ymaxR2 <- ceiling(max(biotable2[,lower2], na.rm = TRUE))
+          biotable2[,lower2] <- biotable2[,lower2]*ymaxL2/ymaxR2
+        } else { ymaxR2 = ymaxL2 }
+        
+      } else { 
+        ymaxR2 <- ceiling(max(biotable2[,lower2], na.rm = TRUE))
+        ymaxL2 = ymaxR2               
+      }     
+                
 
-      ymaxL2 <- ceiling(max(biotable2[,1:3], na.rm = TRUE))
-      ymaxR2 <- ceiling(max(biotable2[,-c(1:3)], na.rm = TRUE))
-
-      biotable2[,-c(1:3)] <- biotable2[,-c(1:3)]*ymaxL2/ymaxR2
 
     } else { numplot = c(numplot, 0) }
 
@@ -347,8 +359,10 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom","distr"),
     
 	axis(side=4, at = pretty(c(0,ymaxL2), n = 5), 
 	     labels = round(pretty(c(0,ymaxL2), n = 5)*ymaxR2/ymaxL2, 1))
-    
-	abline(v = 9.5, col = 3, lwd = 2, lty = 2)
+  
+  if (ymaxR2 != ymaxL2) {
+    abline(v = 3*length(higher2) + 0.5, col = 3, lwd = 2, lty = 2)
+  }    
     
 	legend(x = "topright", bty = "n", horiz = FALSE, 
 	       fill = c("grey", 4, 4), density = c(NA,30,NA),
@@ -392,8 +406,10 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom","distr"),
       axis(side=4, at = pretty(c(0,ymaxL2), n = 5), 
 	   labels = round(pretty(c(0,ymaxL2), n = 5)*ymaxR2/ymaxL2, 1))
     
-      abline(v = 9.5, col = 3, lwd = 2, lty = 2)
-    
+      if (ymaxR2 != ymaxL2) {
+        abline(v = 3*length(higher2) + 0.5, col = 3, lwd = 2, lty = 2)
+      }    
+      
       legend(x = "topright", bty = "n", horiz = FALSE, 
 	     fill = c("grey", 4, 4), density = c(NA,30,NA),
 	     border = c("grey", 4, 4),

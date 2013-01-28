@@ -32,7 +32,7 @@ Graphical parameters as in any other R plot. See \code{\link{par}}. They do not 
 If TRUE, log2(data+K) values are depicted instead of the expression data in the \code{\link{Output}} object. K is an appropriate constant to avoid negative values. It does not apply for graphic="MD".
 }
   \item{chromosomes}{
-Character vector indicating the chromosomes to be plotted and the order in which they have to be plotted. If NULL, all chromosomes are plotted. In some cases, although all chromosomes are to be plotted, it is convenient to specify the order. It only applies for graphic="chrom" and graphic="distr".
+Character vector indicating the chromosomes to be plotted. If NULL, all chromosomes are plotted. It only applies for graphic="chrom" and graphic="distr".  For graphic="chrom", the chromosomes are plotted in the given order. In some cases (e.g. chromosome names are character strings), it is very convenient to specify the order although all chromosomes are being plotted. For graphic="distr", the chromosomes are plotted according to the number of features they contain (from the highest number to the lowest).
 }
   \item{join}{
 If FALSE, each chromosome is depicted in a separate line. If TRUE, all the chromosomes are depicted in the same line, consecutively (useful for prokaryote organisms). It only applies for graphic="chrom".

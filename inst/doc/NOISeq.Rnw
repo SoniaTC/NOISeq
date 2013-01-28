@@ -27,7 +27,7 @@
 \author{Sonia Tarazona (\texttt{starazona@cipf.es})\\Pedro Furió-Tarí (\texttt{pfurio@cipf.es})\\Alberto Ferrer (\texttt{aferrer@eio.upv.es})\\Ana Conesa (\texttt{aconesa@cipf.es})}
 % Please increment date when working on this document, so that
 % date shows genuine change date, not merely date of compile.
-\date{}
+\date{28 January 2013 \\(Version 1.1.5)}
 \maketitle
 
 
@@ -598,7 +598,7 @@ dev.off()
 
 This function creates a figure with two plots if both chromosomes and biotypes information is provided. Otherwise, only a plot is depicted with either the chromosomes or biotypes (if information of any of them is available). The $q$ cutoff must be provided.
 
-Both plots are analogous. The chromosomes plot shows the percentage of features in each chromosome, the proportion of them that are differentially expressed (DEG) and the percentage of differentially expressed features in each chromosome. Users may choose plotting all the chromosomes or only some of them. The plot for biotypes can be described similarly. The only difference is that this plot has a left axis scale for the three most abundant biotypes and a right axis scale for the rest of biotypes, which are separated by a green vertical line.
+Both plots are analogous. The chromosomes plot shows the percentage of features in each chromosome, the proportion of them that are differentially expressed (DEG) and the percentage of differentially expressed features in each chromosome. Users may choose plotting all the chromosomes or only some of them. The chromosomes are depicted according to the number of features they contain (from the greatest to the lowest). The plot for biotypes can be described similarly. The only difference is that this plot has a left axis scale for the most abundant biotypes and a right axis scale for the rest of biotypes, which are separated by a green vertical line.
 
 The following code shows how to draw the figure from the output object returned by \code{NOISeq} for the Marioni's example data. 
 
