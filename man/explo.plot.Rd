@@ -8,34 +8,21 @@ Exploratory plots for expression data.
 }
 
 \description{
-Different types of plots showing the biological classification for detected features, the expression distribution across samples or biological groups, the detection of technical bias such as length, GCcontent or RNA composition, the dependence of expression on sequencing depth, etc.
+Standard generic function. Different types of plots showing the biological classification for detected features, the expression distribution across samples or biological groups, the detection of technical bias such as length, GCcontent or RNA composition, the dependence of expression on sequencing depth, etc.
 }
 
 
 \usage{
-explo.plot(object, samples, toplot = "global", plottype = "barplot", yrightlim = NULL)
+explo.plot(object, ...)
 }
 
 \arguments{
   \item{object}{
 Object generated with \code{dat()} function.
 }
-  \item{samples}{
-Samples or conditions to be plotted. Depending on the type of plot, the two first samples or all the samples are plotted.
-}
-  \item{toplot}{
-A feature is considered to be detected if the corresponding number of read counts is > k. By default, k = 0. This parameter is used by all types except "cd".
-}
-  \item{plottype}{
-Type of plot to be generated for "countsbio" data. If "barplot", the plot indicates for each sample or condition the number of features with 0 counts, 1 count or less, 
-2 counts or less, 5 counts or less and 10 counts or less. Above each bar, the sequencing depth (million reads) is shown. 
-If "boxplot", a boxplot is drawn per sample or condition showing the count distribution for features with more than 0 counts. 
-Both types of plot can be obtained for all features ("global") or for a specified biotype (when biotypes are available).
-}
-  \item{yrightlim}{
-Only for "saturation" plot. Vector with two elements indicating the range for Y right-axis (on the right-hand side of the plot) in the case of new detections are plotted 
-(this occurs when the number of samples to be plotted is 1 or 2). If NULL (default), an appropriate range is computed. 
-}
+  \item{...}{
+    Any argument from \code{par}.
+  }
 }
 
 \value{

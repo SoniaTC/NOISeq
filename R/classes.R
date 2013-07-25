@@ -9,12 +9,11 @@ setClass("Saturation", representation(dat="list"))
 
 setGeneric("explo.plot", function(object, ...) standardGeneric("explo.plot"))
 
-
 setMethod("explo.plot", "Biodetection", function(object, samples = c(1,2), ...) biodetection.plot(object@dat, samples = samples, ...))
 
 setMethod("explo.plot", "CD", function(object, samples = NULL, ...) cd.plot(object@dat, samples = samples, ...))
 
-setMethod("explo.plot", "CountsBio", function(object, toplot = 1, samples = NULL, plottype = "barplot", ...)
+setMethod("explo.plot", "CountsBio", function(object, toplot = 1, samples = NULL, plottype = c("barplot", "boxplot"), ...)
           countsbio.plot(object@dat, toplot = toplot, samples = samples, plottype = plottype, ...))
 
 setMethod("explo.plot", "GCbias", function(object, samples = NULL, toplot = "global", ...)

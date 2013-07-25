@@ -36,6 +36,9 @@ type="countsbio". This object contains the count distribution for each biologica
 If "boxplot", a boxplot is drawn per sample or condition showing the count distribution for features with more than 0 counts. 
 Both types of plot can be obtained for all features ("global") or for a specified biotype (when biotypes are available).
   }
+  \item{...}{
+    Any argument from \code{par}.
+  }
 }
 
 \section{Slots/List Components}{

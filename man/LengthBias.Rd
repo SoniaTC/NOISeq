@@ -32,6 +32,9 @@ It also includes the corresponding spline regression models fitted to explain th
     If samples > 2, only a descriptive plot will be generated. If not, diagnostic plots will be obtained showing both the R-squared and model p-value
 from the spline regression model describing the relationship between the length and the expression. 
   }  
+  \item{...}{
+    Any argument from \code{par}.
+  }
 }
 
 \section{Slots/List Components}{

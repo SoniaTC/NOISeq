@@ -34,7 +34,9 @@ increasing sequencing depths and also the new detections per each million of new
     Range for Y right-axis (on the right-hand side of the plot) when new detections are plotted (this occurs when the number of samples to be plotted is 1 or 2). 
 If NULL (default), an appropriate range is computed.    
     }
-     
+  \item{...}{
+    Any argument from \code{par}.
+  }     
 }
 
 \section{Slots/List Components}{

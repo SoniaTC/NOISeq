@@ -8,10 +8,10 @@ Differential expression method for biological replicates
 \code{noiseqbio} computes differential expression between two experimental conditions from read count data (e.g. RNA-seq).
 }
 \usage{
-noiseqbio(input, k = 0.5, norm = c("rpkm","uqua","tmm","n"), factor=NULL, conditions = NULL, 
-          lc = 1, r = 50, adj = 1.5, nclust = 15, plot = FALSE,
-          a0per = 0.9, random.seed = 12345, filter = 1, depth = NULL,
-          cv.cutoff = 500, cpm = 1)
+noiseqbio(input, k = 0.5, norm = c("rpkm","uqua","tmm","n"), nclust = 15, plot = FALSE,
+                      factor=NULL, conditions = NULL, lc = 1, r = 50, adj = 1.5,
+                      a0per = 0.9, random.seed = 12345, filter = 1, depth = NULL,
+                      cv.cutoff = 500, cpm = 1)
 }
 
 \arguments{

@@ -14,13 +14,19 @@ and the percentage of the biotype within the sample.
 }
 
 \usage{
-\S4method{explo.plot}{Biodetection}(object, ...)
+\S4method{explo.plot}{Biodetection}(object, samples = c(1, 2), ...)
 \S4method{dat2save}{Biodetection}(object)
 }
 
 \arguments{
   \item{object}{
     Object generated from \code{dat()} function.
+  }
+  \item{samples}{
+    Samples or conditions to be plotted. If NULL, the two first samples are plotted because the plot for this object only admit a maximum of two samples.
+  }
+  \item{...}{
+    Any argument from \code{par}.
   }
 }
 
