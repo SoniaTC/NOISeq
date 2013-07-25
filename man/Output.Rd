@@ -6,7 +6,7 @@
 \title{Output class of NOISeq}
 
 \description{
-Output object containing the results from differential expression analysis by \code{NOISeq}.
+Output object containing the results from differential expression analysis by \code{noiseq} or \code{noiseqbio}.
 }
 
 \section{Slots/List Components}{
@@ -25,7 +25,8 @@ Objects of this class contain (at least) the following list components:
 
   \code{replicates}: Type of replicates: "technical" for technical replicates and "biological" for biological ones.
 
-  \code{results}: R data frame containing the differential expression results, where each row corresponds to a feature. The columns are: Expression values for each condition to be used by \code{NOISeq} (the columns names are the levels of the factor); differential expression statistics (columns "M" and "D"); probability of differential expression ("prob"); "ranking", which is a summary statistic of "M" and "D" values equal to -sign(M)*sqrt(M^2 + D^2), than can be used for instance in gene set enrichment analysis; "length" of each feature (if provided); chromosome where the feature is ("Chrom"), if provided; start and end position of the feature within the chromosome ("GeneStart", "GeneEnd"), if provided.  
+  \code{results}: R data frame containing the differential expression results, where each row corresponds to a feature. The columns are: Expression values for each condition to be used by \code{noiseq} 
+or \code{noiseqbio} (the columns names are the levels of the factor); differential expression statistics (columns "M" and "D" for \code{noiseq} or "theta" for \code{noiseqbio}); probability of differential expression ("prob"); "ranking", which is a summary statistic of "M" and "D" values equal to -sign(M)*sqrt(M^2 + D^2), than can be used for instance in gene set enrichment analysis (only when \code{noiseq} is used); "length" and "GC" of each feature (if provided); chromosome where the feature is ("Chrom"), if provided; start and end position of the feature within the chromosome ("GeneStart", "GeneEnd"), if provided.  
 
   \code{nss}: Number of samples to be simulated for each condition (only when there are not replicates available). 
 

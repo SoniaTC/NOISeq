@@ -8,8 +8,16 @@ function (object, q = 0.9, M = NULL) {
     stop("You must give the object returned by the noiseq function\n")
 
   x <- object@results[[1]]
-
-  y <- na.omit(x[c("M","D","prob")])
+  
+  noiseqbio = "theta" %in% colnames(x)[1:4]
+  
+  if (noiseqbio) {
+    y <- na.omit(x[c("theta","prob")])
+    colnames(y)[1] = "M"
+  } else {
+    y <- na.omit(x[c("M","D","prob")])
+  }
+  
 
   if (is.null(M)) {
 
@@ -35,7 +43,6 @@ function (object, q = 0.9, M = NULL) {
   }
 
   # Restore the object with the same "results" structure
-#   losdeg <- cbind(x[rownames(losdeg),c(1:2)],losdeg)
   losdeg = x[rownames(losdeg),]
 
   losdeg[order(losdeg[,"prob"], decreasing = TRUE),]

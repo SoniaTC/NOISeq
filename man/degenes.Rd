@@ -2,10 +2,10 @@
 \alias{degenes}
 
 \title{
-Recover the differencially expressed features
+Recovering differencially expressed features
 }
 \description{
-Recover differencially expressed features for given the threshold from \code{noiseq} output object.
+Recovering differencially expressed features for a given threshold from \code{noiseq} or \code{noiseqbio} output objects.
 }
 \usage{
 degenes(object, q = 0.9, M = NULL)
@@ -19,11 +19,12 @@ Object of class \code{\link{Output}}.
 Value for the probability threshold.
 }
   \item{M}{
-String indicating some options for the differentially expressed genes to select. It can take one of these values: "up" (up-regulated in condition 1), "down" (down-regulated in condition 1), or NULL (all differentially expressed genes).
+String indicating if all differentially expressed features are to be returned or only up or down-regulated features. The possible values are:
+"up" (up-regulated in condition 1), "down" (down-regulated in condition 1), or NULL (all differentially expressed features).
 }
 }
 \value{
-A matrix containing the differencially expressed features is returned.
+A matrix containing the differencially expressed features, the statistics and the probability of differential expression.
 }
 \author{
 Sonia Tarazona
@@ -31,7 +32,7 @@ Sonia Tarazona
 
 
 \seealso{
-       \code{\link{readData}}, \code{\link{noiseq}}.
+       \code{\link{readData}}, \code{\link{noiseq}}, \code{\link{noiseqbio}}.
      }
 
 \examples{
@@ -44,18 +45,7 @@ mynoiseq.deg = degenes(mynoiseq, q = 0.8, M = NULL)
 }
 
 \references{
-
-Bullard J.H., Purdom E., Hansen K.D. and Dudoit S. (2010) Evaluation of statistical methods for 
-normalization and differential expression in mRNA-seq experiments. \emph{BMC Bioinformatics} 11(1):94+.
-
-Mortazavi A., Williams B.A., McCue K., Schaeer L. and Wold B. (2008) Mapping and quantifying 
-mammalian transcriptomes by RNA-seq. \emph{Nature Methods} 5(7):621-628.
-
-Robinson M.D. and Oshlack A. (2010) A scaling normalization method for differential expression
-analysis of RNA-seq data. \emph{Genome Biology} 11(3):R25+.
-
 Marioni, J.C. and Mason, C.E. and Mane, S.M. and Stephens, M. and Gilad, Y. (2008) RNA-seq: an assessment of
 technical reproducibility and comparison with gene expression arrays. \emph{Genome Research}, \bold{18}:
 1509--1517.
-
 }

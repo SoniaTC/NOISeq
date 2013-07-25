@@ -1,9 +1,9 @@
 import(Biobase)
 
-export("noiseq","readData","addData","dat",
+export("noiseq","noiseqbio","readData","addData","dat",
 	"rpkm","tmm","uqua","degenes",
-	"DE.plot")
+	"DE.plot", "filtered.data")
 
-exportClasses("Output","Biodetection","CD","CountsBio","DLBio","Saturation")
+exportClasses("Output","Biodetection","CD","CountsBio","GCbias","lengthbias","Saturation")
 exportMethods("show", "explo.plot","dat2save")
 

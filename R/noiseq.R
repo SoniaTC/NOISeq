@@ -40,6 +40,7 @@ function (input, k = 0.5, norm = c("rpkm","uqua","tmm","n"),
          Please, give the argument 'factor'.\n")
 
   replicates <- match.arg(replicates)
+  if (replicates == "biological") print("WARNING: Your experiment has biological replicates. You should consider using NOISeqBIO instead of NOISeq.")
   norm <- match.arg(norm)
   
   # (M,D) for signal and noise
@@ -50,18 +51,6 @@ function (input, k = 0.5, norm = c("rpkm","uqua","tmm","n"),
  
     #------------------------------------------------------------------#
     
-#   if (plot == TRUE) {
-#   
-#     nombre = paste(c(format(Sys.time(), "%Y%m%d_%H:%M"),"_MD_",miMD$comp,"_",norm,".pdf"),collapse="")
-#     pdf(nombre)
-#     
-#     MD.plot(Ms = miMD$Ms, Ds = miMD$Ds, Mn = miMD$Mn, Dn = miMD$Dn, tit=miMD$comp)
-#     
-#     dev.off()
-#     message(nombre," with the graphic generated.")
-#     
-#   }
-  
   
   
     ## Probability of differential expression
@@ -89,6 +78,8 @@ function (input, k = 0.5, norm = c("rpkm","uqua","tmm","n"),
   resultat <- data.frame(resultat, "ranking" = ranking(resultat)$statistic)
   if (!is.null(featureData(input)@data$Length))
     resultat <- data.frame(resultat, "Length" = as.numeric(as.character(featureData(input)@data[todos,"Length"])))  
+  if (!is.null(featureData(input)@data$Length))
+    resultat <- data.frame(resultat, "GC" = as.numeric(as.character(featureData(input)@data[todos,"GC"])))  
   if (!is.null(featureData(input)@data$Chromosome))
     resultat <- data.frame(resultat, "Chrom" = as.character(featureData(input)@data$Chromosome),
                            "GeneStart" = as.numeric(as.character(featureData(input)@data$GeneStart)),

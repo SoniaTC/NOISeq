@@ -6,11 +6,12 @@
 \alias{mycounts}
 \alias{mychroms}
 \alias{mylength}
+\alias{mygc}
 \alias{myfactors}
 
 \title{Marioni's dataset}
 \description{
-  This is a reduced version for the RNA-seq count data from Marioni et al. (2008) along with additional annotation such as gene biotype, gene length, chromosome, start position and end position for genes in chromosomes I to IV. The expression data consists of 10 samples from kidney and liver tissues. There are five technical replicates (lanes) per tissue.
+  This is a reduced version for the RNA-seq count data from Marioni et al. (2008) along with additional annotation such as gene biotype, gene length, GC content, chromosome, start position and end position for genes in chromosomes I to IV. The expression data consists of 10 samples from kidney and liver tissues. There are five technical replicates (lanes) per tissue.
 }
 \usage{
 data(Marioni)

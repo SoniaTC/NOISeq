@@ -1,5 +1,5 @@
 readData <-
-function (data = NULL, factors = NULL, length = NULL, biotype = NULL, chromosome = NULL) {
+function (data = NULL, factors = NULL, length = NULL, biotype = NULL, chromosome = NULL, gc = NULL) {
 
   if (is.null(data))
     stop("Expression information must be provided to the readData function")
@@ -7,11 +7,17 @@ function (data = NULL, factors = NULL, length = NULL, biotype = NULL, chromosome
   if (is.null(factors))
     stop("Condition information must be provided to the readData funcion")
 
-  if (is.null(length) == FALSE && is.vector(length) == FALSE)
-    stop( "The length info should be a vector.")
+  if (is.null(length) == FALSE && is.vector(length) == FALSE && is.data.frame(length) == FALSE && is.matrix(length) == FALSE)
+    stop( "The length info should be a vector or a data.frame/matrix.")
 
+  if (is.null(gc) == FALSE && is.vector(gc) == FALSE && is.data.frame(gc) == FALSE && is.matrix(gc) == FALSE)
+    stop( "The GC content info should be a vector or a data.frame/matrix.")
+  
   if (is.null(chromosome) == FALSE && ncol(chromosome) != 3)
     stop( "The chromosome object should be a matrix or data.frame with 3 columns: chromosome, start position and end position.")
+
+  if (is.null(biotype) == FALSE && is.vector(biotype) == FALSE && is.data.frame(biotype) == FALSE && is.matrix(biotype) == FALSE)
+    stop( "The biotype info should be a vector or a data.frame/matrix.")
 
   countData <- as.matrix( data )
 
@@ -26,6 +32,9 @@ function (data = NULL, factors = NULL, length = NULL, biotype = NULL, chromosome
 
   if (!is.null(length))
     input <- addData(data = input, length = length)
+
+  if (!is.null(gc))
+    input <- addData(data = input, gc = gc)
 
   if (!is.null(biotype))
     input <- addData(data = input, biotype = biotype)
@@ -43,17 +52,20 @@ function (data = NULL, factors = NULL, length = NULL, biotype = NULL, chromosome
 ######################################################
 
 
-
-
-
-addData <- function(data, length = NULL, biotype = NULL, chromosome = NULL, factors = NULL) {
+addData <- function(data, length = NULL, biotype = NULL, chromosome = NULL, factors = NULL, gc = NULL) {
 
   if (inherits(data,"eSet") == FALSE)
     stop("Error. You must give an eSet object.")
   
-  if (is.null(length) == FALSE && is.vector(length) == FALSE)
-    stop( "The length info should be a vector.")
+  if (is.null(length) == FALSE && is.vector(length) == FALSE && is.data.frame(length) == FALSE && is.matrix(length) == FALSE)
+    stop( "The length info should be a vector or a data.frame/matrix.")  
 
+  if (is.null(gc) == FALSE && is.vector(gc) == FALSE && is.data.frame(gc) == FALSE && is.matrix(gc) == FALSE)
+    stop( "The GC content info should be a vector or a data.frame/matrix.")
+  
+  if (is.null(biotype) == FALSE && is.vector(biotype) == FALSE && is.data.frame(biotype) == FALSE && is.matrix(biotype) == FALSE)
+    stop( "The biotype info should be a vector or a data.frame/matrix.")
+  
   if (is.null(chromosome) == FALSE && ncol(chromosome) != 3)
     stop( "The chromosome object should be a matrix or data.frame with 3 columns: chromosome, start position and end position.")
 
@@ -66,29 +78,78 @@ addData <- function(data, length = NULL, biotype = NULL, chromosome = NULL, fact
   if (!is.null(length)) {
     Length <- rep(NA,length(rowNames))
     names(Length) <- rowNames
-    Length[rowNames] <- as.numeric(length[rowNames])
+    if (is.vector(length)) {
+        Length[rowNames] <- as.numeric(as.character(length[rowNames]))
+    } else if (is.data.frame(length) || is.matrix(length)) {
+        if (ncol(length) == 2) {
+            # We assume that the feature names are in the first column and the length in the second
+            rownames(length) <- length[,1]
+            Length[rowNames] <- as.numeric(as.character( length[rowNames,2]  ))
+        } else if (ncol(length) == 1) {
+            # We assume that the length are in the first column and the feature names in the rownames
+            Length[rowNames] <- as.numeric(as.character( length[rowNames,1]  ))
+        } else {
+            stop( "The length matrix/data.frame contains more columns than expected.")
+        }
+    }
     
     featureData(data)@data <- cbind(featureData(data)@data, Length)
   }
 
+  # If exists gc
+  if (!is.null(gc)) {
+    GC <- rep(NA,length(rowNames))
+    names(GC) <- rowNames
+    if (is.vector(gc)) {
+        GC[rowNames] <- as.numeric(as.character(gc[rowNames]))
+    } else if (is.data.frame(gc) || is.matrix(gc)) {
+        if (ncol(gc) == 2) {
+            # We assume that the feature names are in the first column and the GC content in the second
+            rownames(gc) <- gc[,1]
+            GC[rowNames] <- as.numeric(as.character( gc[rowNames,2]  ))
+        } else if (ncol(gc) == 1) {
+            # We assume that the GC contents are in the first column and the feature names in the rownames
+            GC[rowNames] <- as.numeric(as.character( gc[rowNames,1]  ))
+        } else {
+            stop( "The GC matrix/data.frame contains more columns than expected.")
+        }
+    }
+    
+    featureData(data)@data <- cbind(featureData(data)@data, GC)
+  }
+  
   # If exists biotype
   if (!is.null(biotype)) {
     Biotype <- rep(NA,length(rowNames))
-     names(Biotype) <- rowNames
-    Biotype[rowNames] <- as.character(biotype[rowNames])
+    names(Biotype) <- rowNames
+    if (is.vector(biotype)) {
+        Biotype[rowNames] <- as.character(biotype[rowNames])
+    } else if (is.data.frame(biotype) || is.matrix(biotype)) {
+        if (ncol(biotype) == 2) {
+            # We assume that the feature names are in the first column and the biotypes in the second
+            rownames(biotype) <- biotype[,1]
+            Biotype[rowNames] <- as.character( biotype[rowNames,2]  )
+        } else if (ncol(biotype) == 1) {
+            # We assume that the biotypes are in the first column and the feature names in the rownames
+            Biotype[rowNames] <- as.character( biotype[rowNames,1]  )
+        } else {
+            stop( "The biotype matrix/data.frame contains more columns than expected.")
+        }
+    }
     
     featureData(data)@data <- cbind(featureData(data)@data, Biotype)
-  }
-
-  # If exists biotype
+    featureData(data)@data$Biotype <- as.character(featureData(data)@data$Biotype)
+  } 
+  
+  # If exists chromosome
   if (!is.null(chromosome)) {
 
     Chromosome <- GeneStart <- GeneEnd <- rep(NA,length(rowNames))
     names(Chromosome) <- names(GeneStart) <- names(GeneEnd) <- rowNames
     
     Chromosome[rowNames] <- chromosome[rowNames,1]
-    GeneStart[rowNames] <- as.numeric(chromosome[rowNames,2])
-    GeneEnd[rowNames] <- as.numeric(chromosome[rowNames,3])
+    GeneStart[rowNames] <- as.numeric(as.character(chromosome[rowNames,2]))
+    GeneEnd[rowNames] <- as.numeric(as.character(chromosome[rowNames,3]))
         
     featureData(data)@data <- cbind(featureData(data)@data, Chromosome, GeneStart, GeneEnd)
   }

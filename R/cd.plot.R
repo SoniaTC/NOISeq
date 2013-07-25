@@ -1,65 +1,78 @@
-##### Plot to compare count distributions for two experimental conditions
+##### Plot to compare count distributions for two or more samples
 
 
 ### Generating data
 
-cd.dat <- function (input, columns = c(1:2)) {
+cd.dat <- function (input) {
   
   if (inherits(input,"eSet") == FALSE)
-    stop("Error. You must give an eSet object\n")
+    stop("ERROR: The input data must be an eSet object.\n")
     
-  
-    
-  if (length(columns) < 2)
-    stop("ERROR! You must indicate at least to samples to compare.\n")
   
   if (!is.null(assayData(input)$exprs)) {
     if (ncol( assayData(input)$exprs) < 2)
-      stop("ERROR! Your input object should have at least two different samples.\n")
+      stop("ERROR: The input object should have at least two samples.\n")
+  
+    datos <- assayData(input)$exprs
     
-    cond1 <- assayData(input)$exprs[,columns[1]]
-    cond2 <- assayData(input)$exprs[,columns[2]]
   } else {
     if (ncol( assayData(input)$counts) < 2)
-      stop("ERROR! Your input object should have at least two different samples.\n")
+      stop("ERROR: The input object should have at least two samples.\n")
     
-    cond1 <- assayData(input)$counts[,columns[1]]
-    cond2 <- assayData(input)$counts[,columns[2]]
+    datos <- assayData(input)$counts
+    
+  }
+  
+    
+  datos <- datos[which(rowSums(datos) > 0),]
+  
+  nu <- nrow(datos) # number of detected features
+  
+  qq <- 1:nu
+    
+  data2plot = data.frame("%features" = 100*qq/nu)
+  
+  for (i in 1:ncol(datos)) {
+    
+    acumu <- 100*cumsum(sort(datos[,i], decreasing = TRUE))/sum(datos[,i])
+          
+    data2plot = cbind(data2plot, acumu)    
   }
   
   
-  suma <- cond1 + cond2
+  colnames(data2plot)[-1] = colnames(datos)
   
-  detect <- which(suma > 0)
   
-  cond1.0 <- cond1[detect]
-  cond2.0 <- cond2[detect]
   
-  nu <- length(cond1.0) # number of detected features
+  #### Diagnostic test
   
-  qq <- 1:min(nu,100)
+  KSpval = mostres = NULL
   
-  cum1 <- cumsum(sort(cond1.0, decreasing = TRUE))/sum(cond1.0)
-  cum2 <- cumsum(sort(cond2.0, decreasing = TRUE))/sum(cond2.0)
-  
-  yy1 <- cum1[round(nu*qq/min(nu,100), 0)]*100
-  yy2 <- cum2[round(nu*qq/min(nu,100), 0)]*100
-  
-  data2plot = data.frame("%detected_features" = qq,
-                         "%cumulative_reads_1" = yy1,
-                         "%cumulative_reads_2" = yy2)
-  
-  if (!is.null(assayData(input)$exprs)) {
-    
-    colnames(data2plot)[2:3] = colnames(assayData(input)$exprs)[columns]
-        
-  } else {
-    
-    colnames(data2plot)[2:3] = colnames(assayData(input)$counts)[columns]
-    
+  for (i in 1:(ncol(datos)-1)) {
+    for (j in (i+1):ncol(datos)) {      
+      mostres = c(mostres, paste(colnames(datos)[c(i,j)], collapse = "_"))
+      #KSpval = c(KSpval, ks.test(datos[,i], datos[,j], alternative = "two.sided")$"p.value")
+      KSpval = c(KSpval, suppressWarnings(ks.test(datos[,i], datos[,j], alternative = "two.sided"))$"p.value")
+    }
   }
+  
+  KSpval = p.adjust(KSpval, method = "fdr")
+  print("Summary of FDR adjusted p-values:")
+  print(summary(KSpval))
     
-  data2plot
+  if (sum(KSpval < 0.05) > 0) {
+    print("Diagnostic test: FAILED. Normalization is required to correct this bias.")
+    print("According to Kolmogorov-Smirnov tests, at least a pair of samples have significantly different distributions")
+    print("Minimum adjusted p-value was: "); print(min(KSpval, na.rm = TRUE))
+  }  else {
+    print("Diagnostic test: PASSED.")
+  }
+  
+  
+  #### Results
+  
+  list("data2plot" = data2plot, 
+       "DiagnosticTest" = data.frame("ComparedSamples" = mostres, "KSpvalue" = KSpval))
    
 }
 
@@ -73,14 +86,26 @@ cd.dat <- function (input, columns = c(1:2)) {
 
 ### Generating plot
 
-cd.plot <- function (data2plot,...) {
+cd.plot <- function (dat, samples = NULL,...) {
   
-  plot(data2plot[,1], data2plot[,2], xlab = "% detected features", ylab = "% cumulative reads",
-       type = "l", col = 2, main = "Count cumulative distribution")
+  dat = dat$data2plot
+  
+  if (is.null(samples)) samples <- 1:(ncol(dat)-1)
+  if(length(samples) > 12) stop("Please select 12 samples or less to be plotted.")
+  
+  if (is.numeric(samples)) { samples = colnames(dat)[samples+1] }
+      
+  
+  plot(dat[,1], dat[,samples[1]], xlab = "% features", ylab = "% reads",
+       type = "l", col = miscolores[1],...)
+  
+  for (i in 2:length(samples)) {
+    
+    lines(dat[,1], dat[,samples[i]], col = miscolores[i])
+    
+  }  
 
-  lines(data2plot[,1], data2plot[,3], col = 4)
-
-  legend("bottom", legend = colnames(data2plot[-1]), text.col = c(2,4), bty = "n",
-         lty = 1, lwd = 2, col = c(2,4), cex = 1.5)
+  legend("bottom", legend = samples, text.col = miscolores[1:length(samples)], bty = "n",
+         lty = 1, lwd = 2, col = miscolores[1:length(samples)])
 
 }

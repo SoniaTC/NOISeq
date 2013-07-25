@@ -1,157 +1,121 @@
 require(methods)
 
 setClass("Biodetection", representation(dat="list"))
-setClass("CD", representation(dat="data.frame"))
+setClass("CD", representation(dat="list"))
 setClass("CountsBio", representation(dat="list"))
-setClass("DLBio", representation(dat="list"))
+setClass("GCbias", representation(dat="list"))
+setClass("lengthbias", representation(dat="list"))
 setClass("Saturation", representation(dat="list"))
 
 setGeneric("explo.plot", function(object, ...) standardGeneric("explo.plot"))
 
 
-setMethod("explo.plot", "Biodetection", function(object) biodetection.plot(object@dat))
-setMethod("explo.plot", "CD", function(object) cd.plot(object@dat))
-setMethod("explo.plot", "CountsBio", function(object, toplot = 1, samples = NULL, ylim = NULL)
-          countsbio.plot(object@dat, toplot = toplot, samples = samples, ylim = ylim))
-setMethod("explo.plot", "DLBio", function(object, samples = NULL, toplot = "protein_coding", ylim = NULL)
-          DLbio.plot(object@dat, samples = samples, toplot = toplot,ylim = ylim))
+setMethod("explo.plot", "Biodetection", function(object, samples = c(1,2), ...) biodetection.plot(object@dat, samples = samples, ...))
+
+setMethod("explo.plot", "CD", function(object, samples = NULL, ...) cd.plot(object@dat, samples = samples, ...))
+
+setMethod("explo.plot", "CountsBio", function(object, toplot = 1, samples = NULL, plottype = "barplot", ...)
+          countsbio.plot(object@dat, toplot = toplot, samples = samples, plottype = plottype, ...))
+
+setMethod("explo.plot", "GCbias", function(object, samples = NULL, toplot = "global", ...)
+          GC.plot(object@dat, samples = samples, toplot = toplot, ...))
+
+setMethod("explo.plot", "lengthbias", function(object, samples = NULL, toplot = "global", ...)
+          length.plot(object@dat, samples = samples, toplot = toplot, ...))
+
 setMethod("explo.plot", "Saturation",
-          function(object, toplot = 1, samples = NULL, ylim = NULL, yrightlim = NULL)
-          saturation.plot(object@dat, toplot = toplot, samples = samples, ylim = ylim, yrightlim = yrightlim))
+          function(object, toplot = 1, samples = NULL, yrightlim = NULL, ...)
+          saturation.plot(object@dat, toplot = toplot, samples = samples, yrightlim = yrightlim, ...))
+
 
 # Show methods for exploration objects
 setMethod("show", "Biodetection",
     function(object) {
-      for (i in c(1:length(object@dat$samples))) {
-        cat("\n",object@dat$samples[i],"\n==========\n")
-        print(object@dat[i])
+      cat("\n Reference genome: \n==========\n")
+      names(dimnames(object@dat$genome)) = NULL
+      print(object@dat$genome)
+      for (i in c(1:length(object@dat$biotables))) {
+        cat("\n",names(object@dat$biotables)[i],"\n==========\n")
+        print(object@dat$biotables[[i]])
       }
     })
            
 
 setMethod("show", "CD",
-    function(object) {
-      
-      cat("\nSummary\n=======\n")
-      print(head(object@dat))
-      
+    function(object) {      
+      cat("\n FDR adjusted pvalues for Kolmogorov-Smirnov tests comparing each pair of samples:\n=======\n")
+      print((object@dat$DiagnosticTest))      
     })
 
 setMethod("show", "CountsBio",
-          function(object) {
-            for (i in c(1:length(object@dat$quart))) {
-              cat("\n",names(object@dat$quart)[i],"\n============\n")
-              aux <- cbind(object@dat$quart[[i]],object@dat$bionum[rownames(object@dat$quart[[i]])])
-              colnames(aux)[4] <- "bionum"
-              print(head(aux))
-            }
-            
+          function(object) {            
+              cat("\n Summary: \n============\n")              
+              print(object@dat$summary[[1]])            
           })
 
-setMethod("show","DLBio",
+
+setMethod("show","GCbias",
           function(object) {
-            x <- dat2save(object)
-            print(head(x[[1]]))
+            x <- object@dat$RegressionModels
+            for (i in 1:length(x)) {
+              print(names(x)[i])
+              print(summary(x[[i]]))
+            }            
+          })
+
+
+setMethod("show","lengthbias",
+          function(object) {
+            x <- object@dat$RegressionModels
+            for (i in 1:length(x)) {
+              print(names(x)[i])
+              print(summary(x[[i]]))
+            }            
           })
 
 setMethod("show","Saturation",
           function(object) {
             x <- dat2save(object)
-            print(head(x[[1]]))
+            cat("\n Number of detected features at each sequencing depth: \n============\n")  
+            print(x[[1]])
           })
+
 
 # Coercion methods for exploration objects
 
 setGeneric("dat2save", function(object)  standardGeneric("dat2save"))
 
-setMethod("dat2save","Biodetection", function(object) {
-  aux <- list()
-
-  if (length(object@dat$samples) == 2)
-    aux <- list(object@dat$table, object@dat$table2)
-  else
-    aux <- list(object@dat$table)
-  
-  names(aux) <- object@dat$samples
-
-  aux  
-})
+setMethod("dat2save","Biodetection", function(object) object@dat)
 
 setMethod("dat2save","CD", function(object) object@dat)
 
-setMethod("dat2save","CountsBio", function(object)  {
+setMethod("dat2save","CountsBio", function(object)  object@dat$summary)
 
-  x <- list()
-  for (i in c(1:length(object@dat$quart))) {
-    aux <- cbind(object@dat$quart[[i]],object@dat$bionum[rownames(object@dat$quart[[i]])])
-    colnames(aux)[4] <- "bionum"
-    x[[i]] <- aux
-  }
+setMethod("dat2save","GCbias", function(object) object@dat$data2plot)
 
-  names(x) <- names(object@dat$quart)
-
-  x
-
-  })
-
-setMethod("dat2save","DLBio", function(object) {
-
-  biotipos <- names(object@dat$result)
-  muestras <- names(object@dat$depth)
-
-  mat <- matrix(0, nrow = length(biotipos), ncol = 7, dimnames=list(biotipos, c(1:7)))
-  lista <- list()
-
-  for (i in 1:length(muestras)) {
-    mat.aux <- mat
-
-    for (j in 1:length(biotipos)) {
-      mat.aux[j,3:7] <- object@dat$result[[j]][[i]]      
-    }
-
-    mat.aux[,1] <- object@dat$bionum
-    mat.aux[,2] <- object@dat$biolength
-
-    colnames(mat.aux) <- c("bionum","biolength",
-                           paste("depth_",sprintf("%0.3f", object@dat$depth[[i]]/10^6), sep=""))
-    
-    lista[[i]] <- mat.aux
-  }
-
-  names(lista) <- muestras
-  lista
-  
-})
+setMethod("dat2save","lengthbias", function(object) object@dat$data2plot)
 
 setMethod("dat2save","Saturation", function(object) {
+  
+  muestras = vector("list", length = length(object@dat$depth))
+  names(muestras) = names(object@dat$depth)
+  
+  for (i in 1:length(muestras)) {
+    
+    muestras[[i]] = object@dat$depth[[i]]
 
-  biotipos <- names(object@dat$saturation)
-  muestras <- names(object@dat$depth)
-
-  mat <- matrix(0, nrow = length(biotipos), ncol = 11, dimnames=list(biotipos, c(1:11)))
-  lista <- list()
-
-  for ( i in 1:length(muestras)) {
-    mat.aux <- mat
-
-    for (j in 1:length(biotipos)) {
-      mat.aux[j,2:6]  <- object@dat$saturation[[j]][[i]]
-      mat.aux[j,7:11] <- object@dat$newdet[[j]][[i]]
+    for (j in 1:length(object@dat$saturation)) {
+      muestras[[i]] = cbind(muestras[[i]], object@dat$saturation[[j]][[i]])
     }
 
-    mat.aux[,1] <- object@dat$bionum
-
-    colnames(mat.aux) <- c("bionum",
-                           paste("num", sprintf("%0.3f", object@dat$depth[[i]]/10^6),sep="_"),
-                           paste("new", sprintf("%0.3f", object@dat$depth[[i]]/10^6),sep="_"))
-    
-    lista[[i]] <- mat.aux
+    colnames(muestras[[i]]) <- c("depth", names(object@dat$saturation))
   }
 
-  names(lista) <- muestras
-  lista  
-  
+  muestras  
 })
+
+
+
 
 ############################################################################
 ############################# OUTPUT OBJECT ################################

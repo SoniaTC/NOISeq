@@ -1,170 +1,128 @@
 ##Counts for detected genes Plot according to BIOTYPES (boxplots)
 
-countsbio.dat <- function (input, cols = NULL, k = 0, biotypes = NULL,
-                           ndepth = 5, quartiles = FALSE)  {
+countsbio.dat <- function (input, biotypes = NULL, factor = NULL)  {
 
   # input: input object
-  # cols: Data columns to be used in the analysis
-  # k: Only genes with counts > k will be included in the analysis
   # biotypes: List containing groups of biotypes to be studied
-  # ndepth: Number of different depths to be plotted. 
-  # quartiles: Return a summary matrix with quantile information for each biotype
+  # factor: If not NULL, it should contain the conditions to be studied and
+  #         calculation will be done based on the mean of replicates of each condition.
+  # quartiles: Return a summary matrix with quantile information for each biotype.
 
-  # if no cols defined, all the samples are taken
+
 
   if (inherits(input,"eSet") == FALSE)
     stop("Error. You must give an eSet object\n")
-
-  if (any(!is.na(featureData(input)@data$Biotype)) == FALSE)
-    stop ("No biological classification provided.\nPlease run addData() function to add 
-          this information\n")
-
-  if (is.null(cols)) {
-    if (!is.null(assayData(input)$exprs))
-      cols <- c(1:NCOL(assayData(input)$exprs))
-    else
-      cols <- c(1:NCOL(assayData(input)$counts))
-  }
+  
 
   if (!is.null(assayData(input)$exprs))
-    datos <- assayData(input)$exprs[,cols]
+    datos <- assayData(input)$exprs
   else
-    datos <- assayData(input)$counts[,cols]
+    datos <- assayData(input)$counts
   
-  if (length(cols) == 1)
-    datos <- as.matrix(datos)
-
-  infobio <- featureData(input)@data$Biotype
-
-  nsam <- NCOL(datos)
-
-  if (is.null(biotypes)) {
-    biotypes <- unique(infobio)
-    names(biotypes) <- biotypes
-  }
   
-  # which genes belong to each biotype
-  biog <- lapply(biotypes, function(x) { which(is.element(infobio, x)) })
-  
-  satura <- vector("list", length = length(biotypes)+1)
-  names(satura) <- c("global", names(biotypes))
-  
-  # Random subsamples for each sample at each depth
-  submuestras <- seq.depth <- vector("list", length = nsam)
-  names(submuestras) <- names(seq.depth) <- colnames(datos)
-
-  for (n in 1:nsam) {
-
-    total <- sum(datos[,n])
-
-    varias <- vector("list", length = ndepth) 
-        
-    for(i in 1:(ndepth-1)) {  
-
-      varias[[i]] <- rmultinom(10, size = round(total*i/ndepth, 0),
-                               prob = datos[,n])
-    }
-
-    varias[[ndepth]] <- as.matrix(datos[,n])
-
-    submuestras[[n]] <- lapply(varias, rowMeans)
-
-    seq.depth[[n]] <- sapply(varias, function (x) { mean(colSums(x)) })
-  }
-  
-  ## selecting detected genes counts for each biotype
-  for (j in 2:length(satura))  {
-    satura[[j]] <- vector("list", length = nsam)
-    names(satura[[j]]) <- colnames(datos)
-
-    for (n in 1:nsam) {      
-
-      # selecting genes in bioclass j for each sample
-      conbio <- lapply(submuestras[[n]],
-                       function(x) { x[biog[[j-1]]] })
-
-      satura[[j]][[n]] <- vector("list", length = ndepth)
-      names(satura[[j]][[n]]) <- paste("depth", 1:ndepth, sep = "")      
-
-      for (i in 1:length(conbio)) {            
-      # selecting the genes with counts > k
-        noK <- noceros(conbio[[i]], k = k, num = FALSE)
-
-        if (is.null(noK)) {
-          satura[[j]][[n]][[i]] <- NA
-        } else {
-          satura[[j]][[n]][[i]] <- conbio[[i]][noK]
-        }
-      }      
-    }
-  }
-
-
-  ## Global
-  satura[[1]] <- vector("list", length = nsam)
-  names(satura[[1]]) <- colnames(datos)
-
-  for (n in 1:nsam) {
-
-    satura[[1]][[n]] <- vector("list", length = length(biotypes))
-    names(satura[[1]][[n]]) <- names(biotypes)
-
-    for (j in 1:length(biotypes)) {
-
-      satura[[1]][[n]][[j]] <- satura[[j+1]][[n]][[ndepth]]
-
-    }
-  }
-
-
-  bionum <- c(NROW(datos), sapply(biog, length))
-  names(bionum) <- names(satura)
-
-  # Create the summary matrix information
-  if (quartiles == TRUE) {
+  ceros = which(rowSums(datos) == 0)
+  hayceros = (length(ceros) > 0)
     
-    annot <- names(biotypes)
+  if (hayceros) {
+    print(paste("Warning:", length(ceros), 
+                "features with 0 counts in all samples are to be removed for this analysis."))
+    datos0 = datos[-ceros,]
+  } else { datos0 = datos}
+    
+  
+  nsam <- NCOL(datos)
+  
+  if (nsam == 1) {
+    datos <- as.matrix(datos)
+    datos0 <- as.matrix(datos0)
+  } 
 
-    mat <- vector("list", length = length(cols))
-    names(mat) <- names(satura[[1]])
-
-    for (h in 1:length(mat)) {
-
-      mat[[h]] <- matrix(nrow = length(biotypes), ncol = 3)
-
-      for ( i in 1:length(biotypes)) {
-        mat[[h]][i,] = quantile(satura[[1]][[h]][[i]],na.rm=TRUE)[2:4]
-      }
-
-      rownames(mat[[h]]) <- annot
-      colnames(mat[[h]]) <- c("1st quartile","Median","3rd quartile")
-    }
+  
+  # Per condition
+  if (is.null(factor)) {  # per sample  
+    print("Count distributions are to be computed for:")
+    print(colnames(datos))
+    
+  } else {  # per condition
+    mifactor = pData(input)[,factor]
+    niveles = levels(mifactor)
+    print("Counts per million distributions are to be computed for:")
+    print(niveles)
+    datos = sapply(niveles, 
+                   function (k) { 
+                     rowMeans(t(t(datos[,grep(k, mifactor)])/colSums(datos[,grep(k, mifactor)])))
+                     })
+    datos0 = sapply(niveles, 
+                    function (k) { 
+                      rowMeans(t(t(datos0[,grep(k, mifactor)])/colSums(datos0[,grep(k, mifactor)])))
+                    })
+    colnames(datos) = colnames(datos0) = niveles
   }
+  
+  
+  
+  # Biotypes
+  if (!is.null(featureData(input)$Biotype)) {  # read biotypes if they are provided
+    if (hayceros) { 
+      infobio0 <- as.character(featureData(input)$Biotype)[-ceros] 
+    } else { infobio0 =  as.character(featureData(input)$Biotype) }
+    infobio <- as.character(featureData(input)$Biotype)
+  } else { infobio = NULL }  
+  
+  if (!is.null(infobio)) {    
+    if(is.null(biotypes)) {
+      biotypes <- unique(infobio)
+      names(biotypes) <- biotypes    
+    }   
+    # which genes belong to each biotype
+    biog <- lapply(biotypes, function(x) { which(is.element(infobio0, x)) })
+    names(biog) = biotypes
+    bionum <- c(NROW(datos0), sapply(biog, length))
+    names(bionum) <- c("global", names(biotypes)) 
+    bio0 = which(bionum == 0)
+    if (length(bio0) > 0) bionum = bionum[-bio0]
+        
+  } else { biotypes = NULL; bionum = NULL }   
+  
+  
+  # Create the summary matrix information
+  resumen = vector("list", length = length(bionum))
+  names(resumen) = names(bionum)
+  cuentas = c(0,1,2,5,10)
+      
+  for (i in 1:length(resumen)) { 
+    if (i == 1) { 
+      datosR = datos 
+    } else {       
+      if(!is.null(infobio)) {
+        datosR = datos[which(infobio == names(resumen)[i]),]
+        if (class(datosR) !=  "matrix") { datosR = t(as.matrix(datosR)) } 
+      }
+    }
+    
+        
+    numeros = t(sapply(cuentas, function(x) { apply(datosR, 2, 
+                                                  function (y) { length(which(y <= x)) }) }))
+    numeros = rbind(numeros, nrow(datosR)-numeros[5,], nrow(datosR), 
+                    round(colSums(datos)/10^6, 1))
+    resumen[[i]] = data.frame(c(0, "<=1", "<=2", "<=5", "<=10", ">10", "total", "depth"),
+                              numeros)
+    colnames(resumen[[i]])[1] = names(resumen)[i]
+                              
+  }  
+  
 
   ## results
-  if (quartiles == TRUE)
-    satura <- list("result" = satura, 
-		  "bionum" = bionum,
-		  "depth" = seq.depth,
-		  "quart" = mat)                 
-  else
-    satura <- list("result" = satura, 
-		"bionum" = bionum,
-		"depth" = seq.depth)                 
-
-  satura
+  cosas <- list("result" = datos0, 
+                 "bionum" = bionum,
+                 "biotypes" = infobio0,
+                 "summary" = resumen)    
+  
+  cosas
 }
 
 
 
-
-#***************************************************************************#
-#***************************************************************************#
-
-
-
-
-miscolores <- colors()[c(554,89,111,512,17,586,132,428,601,568,86,390)]
 
 
 
@@ -176,121 +134,112 @@ miscolores <- colors()[c(554,89,111,512,17,586,132,428,601,568,86,390)]
 
 ## PLOT: Mean length for detected genes Plot according to BIOTYPES
 
-countsbio.plot <- function (dat, toplot = 1, samples = NULL, ylim = NULL,...) {
+countsbio.plot <- function (dat, toplot = "global", samples = NULL, plottype = c("barplot", "boxplot"), ...) {
 
   # dat: Data coming from countsbio.dat function
-  # samples: Samples to be plotted. If NULL, two first samples are plotted.
-  # toplot: Number or name of biotype (including "global") to be plotted.
+  # samples: Samples to be plotted. If NULL, all samples are plotted.
+  # toplot: Name of biotype (including "global") to be plotted.
 
-  
   ## Preparing data
+  if (is.null(samples)) { samples <- 1:NCOL(dat$result) }
+  if(is.numeric(toplot)) toplot = names(dat$summary)[toplot]
+  if (is.numeric(samples)) samples = colnames(dat$result)[samples]
   
-  legend = names(dat$result[[1]])[samples]
-  
-  if (is.null(samples)) { samples <- 1:2 }
-  sat <- dat$result[[toplot]][samples]
-  depth <- dat$depth[samples]
-  num <- dat$bionum[[toplot]]
-
-  if (num == 0) {
-
-    print("Error: No data available. Please, change toplot parameter.")
-     
-  } else {
-
-    # ylim for plot
-    if (is.null(ylim)) {
-      ylim <- range(na.omit(unlist(sat)))   
-    } 
+  if (plottype == "barplot") {
+    
+    if (!exists("ylab")) ylab = ""
+    
+    datos = dat$summary[[toplot]]
+    datos = as.matrix(datos[,samples])
+    rownames(datos) = dat$summary[[toplot]][,1]
     
     
-    # main
-    if (is.numeric(toplot)) {
-      
-      elbiotipo = names(dat$result)[toplot]
-      
-    } else { elbiotipo = toplot }
-    
-    main <- paste(names(sat), "-", elbiotipo, " (", num, ")", sep = "")
-    
-      
-      
-    
-    # BOXPLOTSdim
-    
-    if (length(samples) == 1) {  # only 1 sample
-
-      if (toplot == 1 | toplot == "global") { # global, only 1 sample
-     
-        boxplot(sat[[1]], col = miscolores[12], ylim = ylim, main = main,
-                xlab = NULL, ylab = "counts of detected features", cex.main = 1,
-                cex.lab = 1, cex.axis = 1, las = 0,...)
-
-        cuantos <- sapply(lapply(sat[[1]], na.omit), length)
-
-        mtext(cuantos, 3, at = 1:length(sat[[1]]), cex = 0.6, las = 0)
-      }
-      
-
-      if (toplot != 1 & toplot != "global") { # biotype, only 1 sample       
-
-        m <- boxplot(sat[[1]], col = miscolores[12], ylim = ylim, main = main,
-                xlab = NULL, ylab = "counts of detected features", cex.main = 1,
-                cex.lab = 1, cex.axis = 1,
-                names = round(depth[[1]]/10^6,2), las = 0,...)
-
-        cuantos <- sapply(lapply(sat[[1]],na.omit), length)
-
-        mtext(cuantos, 3, at = 1:length(sat[[1]]), cex = 0.6, las = 0)
-      }
-      
-
-    } else {   # 2 samples
-
-      par (mfrow = c(1,2))
-      mycolor <- miscolores[c(12,11)]
-
-      if (toplot == 1 | toplot == "global") { # global, 2 samples
-     
-        boxplot(sat[[1]], col = mycolor[1], ylim = ylim,
-                main = main[1], xlab = NULL, ylab = "counts of detected features", cex.main = 1,
-                cex.lab = 1, cex.axis = 1, las = 0,...)
-
-        cuantos <- sapply(lapply(sat[[1]], na.omit), length)
-
-        mtext(cuantos, 3, at = 1:length(sat[[1]]), cex = 0.6, las = 0)
-
-        boxplot(sat[[2]], col = mycolor[2], ylim = ylim,
-                main = main[2], xlab = NULL, ylab = "counts of detected features", cex.main = 1,
-                cex.lab = 1, cex.axis = 1, las = 0,...)
-
-        cuantos <- sapply(lapply(sat[[2]], na.omit), length)
-
-        mtext(cuantos, 3, at = 1:length(sat[[2]]), cex = 0.6, las = 0)
-      }
-      
-      
-      if (toplot != 1 & toplot != "global") { # biotype, 2 samples
-
-        boxplot(sat[[1]], col = mycolor[1], ylim = ylim,
-                main = main[1], xlab = NULL, ylab = "counts of detected features", cex.main = 1,
-                cex.lab = 1, cex.axis = 1,
-                names = round(depth[[1]]/10^6,2), las = 0,...)
-
-        cuantos <- sapply(lapply(sat[[1]], na.omit), length)
-
-        mtext(cuantos, 3, at = 1:length(sat[[1]]), cex = 0.6, las = 0)
-
-        boxplot(sat[[2]], col = mycolor[2], ylim = ylim,
-                main = main[2], xlab = NULL, ylab = "counts of detected features", cex.main = 1,
-                cex.lab = 1, cex.axis = 1, names = round(depth[[2]]/10^6,2), las = 0,...)
-
-        cuantos <- sapply(lapply(sat[[2]], na.omit), length)
-
-        mtext(cuantos, 3, at = 1:length(sat[[2]]), cex = 0.6, las = 0)    
-      }
+    par(mar = c(6,4,4,2))
+        
+    barplot(as.numeric(datos["total",]), las = 2,
+            cex.axis = 0.8, border = NA, ylab = "", main = "", ...)
+    barplot(as.numeric(datos["<=10",]), ylab = "",  las = 2,
+            cex.axis = 0.8, border = NA, add = TRUE,
+            main = "", col = miscolores[1], ...)
+    barplot(as.numeric(datos["<=5",]), ylab = "",  las = 2,
+            cex.axis = 0.8, border = NA, add = TRUE,
+            main = "", col = miscolores[2], ...)
+    barplot(as.numeric(datos["<=2",]), ylab = "",  las = 2,
+            cex.axis = 0.8, border = NA, add = TRUE,
+            main = "", col = miscolores[3], ...)
+    barplot(as.numeric(datos["<=1",]), ylab = "",  las = 2,
+            cex.axis = 0.8, border = NA, add = TRUE,
+            main = "", col = miscolores[4], ...)
+    bp = barplot(as.numeric(datos["0",]), ylab = ylab,
+                 names.arg = colnames(datos), las = 2, cex.names = 0.8,
+                 cex.axis = 0.8, border = NA, add = TRUE,
+                 main = paste(toupper(toplot), " (", datos["total",1], ")", sep = ""),
+                 col = miscolores[6], ...)
+    if (length(samples) <= 20) {
+      mtext(side = 3, text = datos["depth",], adj = 0.5, at = bp, cex = 0.7)
+    } else {
+      mtext(side = 3, text = datos["depth",], at = bp, cex = 0.7, las = 2)
     }
+    legend(x = length(samples)/3, y = datos["total",1]*0.99, c(rownames(datos)[1:5],"All"), 
+           fill = c(miscolores[c(6,4:1)],"grey"), title = "#Features with expression value:",
+           bg = "white", ncol = 3, cex = 0.8)
+    
+    par(mar = c(5, 4, 4, 4) + 0.1) 
   }
-  par(mfrow=c(1,1))
-
+  
+  
+  
+  
+  if (plottype == "boxplot") {
+    
+    conteos <- as.matrix(dat$result[,samples])
+    if (is.numeric(samples)) colnames(conteos) = colnames(dat$result)[samples]
+    else colnames(conteos) = samples
+    num <- dat$bionum[toplot]
+    infobio = dat$biotypes
+    
+    if (num == 0) stop("Error: No data available. Please, change toplot parameter.")
+    
+    if (!exists("ylim")) ylim = range(na.omit(log2(1+conteos)))
+    if (!exists("ylab")) ylab = "Expression values"
+    
+    ## Plots  
+    
+    if (length(samples) == 1) {  # only 1 sample is to be plotted (per biotypes if available)
+      
+      escala = logscaling(conteos, base = 2)
+      
+      if (is.null(infobio)) {
+        boxplot(escala$data, col = miscolores[1], ylim = ylim, ylab = ylab,
+                main = "", yaxt = "n", ...)
+      } else {
+        par(mar = c(10, 4, 4, 2))  
+        boxplot(escala$data ~ infobio, col = miscolores, ylim = ylim, ylab = ylab,
+                main = colnames(conteos), las = 2, cex.axis = 0.8, cex.lab = 0.9, yaxt = "n", ...)
+        cuantos = dat$bionum[-1]
+        cuantos = cuantos[sort(names(cuantos))]
+        mtext(cuantos, 3, at = 1:length(cuantos), cex = 0.6, las = 2)
+      }    
+      
+      
+    } else {   # more than 1 sample is to be plotted
+      if (toplot != "global") conteos = conteos[which(infobio == toplot),]          
+      
+      escala = logscaling(conteos, base = 2)
+      main <- paste(toupper(toplot), " (", num, ")", sep = "")
+      
+      par(mar = c(6, 4, 2, 2))  
+      boxplot(escala$data, col = miscolores, ylim = ylim, ylab = ylab,
+              main = main, las = 2, cex.lab = 0.9, cex.axis = 0.8, yaxt = "n", ...)       
+    }
+    
+    axis(side = 2, at = escala$at, labels = escala$labels)
+    
+    par(mar = c(5, 4, 4, 4) + 0.1)        
+    
+  } 
+  
+  
 }
+
+

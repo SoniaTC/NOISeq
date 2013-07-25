@@ -9,7 +9,7 @@ Normalization methods
 \description{
 Normalization procedures such as RPKM (Mortazavi et al., 2008),
 Upper Quartile (Bullard et al., 2010) and TMM (Trimmed Mean of M) (Robinson and Oshlack, 2010). 
-These normalization functions are used within the \code{noiseq} function but may be also used by themselves to normalize a dataset.
+These normalization functions are used within the \code{noiseq} or \code{noiseqbio} functions but may be also used by themselves to normalize a dataset.
 }
 \usage{
 uqua(datos, long = 1000, lc = 1, k = 0)

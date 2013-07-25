@@ -2,7 +2,7 @@
 \alias{noiseq}
 
 \title{
-Differential expression method
+Differential expression method for technical replicates or no replicates at all
 }
 \description{
 \code{noiseq} computes differential expression between two experimental conditions from read count data (e.g. RNA-seq).

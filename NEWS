@@ -15,3 +15,8 @@ version 1.1.4 (2013-01-21)
 
 version 1.1.5 (2013-01-28)
  - Some graphical improvements made
+
+version 2.0.0 (2013-07-25)
+ - Included the new version of NOISeq for biological replicates: NOISeqBIO
+ - Improved the exploratory plots for the quality control of the data that now include diagnostic plots for bias detection
+ - Included a function to filter out low count features
