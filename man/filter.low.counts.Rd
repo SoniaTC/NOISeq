@@ -41,9 +41,6 @@ Cutoff for the coefficient of variation per condition to be used in method 1.
 Cutoff for the counts per million value to be used in methods 1 and 3.
 }
 }
-\details{
-}
-
 
 \examples{
 

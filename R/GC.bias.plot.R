@@ -142,7 +142,7 @@ GC.dat <- function (input, factor = NULL)  {
   
   
   ## SPLINES REGRESSION MODEL   
-  library(splines)
+  #library(splines)
   
   datos = GCexpr[[1]]
   GCcont = datos[,1]  

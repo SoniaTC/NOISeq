@@ -142,7 +142,7 @@ length.dat <- function (input, factor = NULL)  {
   
   
   ## SPLINES REGRESSION MODEL   
-  library(splines)
+  #library(splines)
   
   datos = longexpr[[1]]
   longi = datos[,1]  
