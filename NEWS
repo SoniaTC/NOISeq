@@ -22,4 +22,6 @@ version 2.0.0 (2013-07-25)
  - Included a function to filter out low count features
 
 version 2.2.0 (2013-10-14)
- - Possibility to get a Quality Control Report from your samples in PDF format
+ - New function to generate a Quality Control Report in PDF format including all the exploratory plots.
+ - Plot to evaluate RNA composition bias has been changed.
+ - Some bugs have been fixed.
