@@ -1,10 +1,10 @@
 ##### Function to generate data for exploratory plots #####
 
 # By Sonia & Pedro
-# Modified: 11-jul-13
+# Modified: 10-sep-13
 
 dat = function (input, type = c("biodetection","cd","countsbio","GCbias","lengthbias","saturation"), 
-                k = 0, ndepth = 6, factor = NULL) {
+                k = 0, ndepth = 6, factor = NULL, norm = FALSE, refColumn = 1) {
   
   type <- match.arg(type)
   
@@ -15,7 +15,7 @@ dat = function (input, type = c("biodetection","cd","countsbio","GCbias","length
   
   if (type == "cd") {
     
-    output = new("CD", dat = cd.dat(input))
+    output = new("CD", dat = cd.dat(input, norm = norm, refColumn = refColumn))
   }
   
   if (type == "countsbio") {

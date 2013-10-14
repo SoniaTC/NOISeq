@@ -1,9 +1,10 @@
+
 ##### Plot to compare count distributions for two or more samples
 
 
 ### Generating data
 
-cd.dat <- function (input) {
+cd.dat <- function (input, norm = FALSE, refColumn = 1) {
   
   if (inherits(input,"eSet") == FALSE)
     stop("ERROR: The input data must be an eSet object.\n")
@@ -23,47 +24,63 @@ cd.dat <- function (input) {
     
   }
   
-    
-  datos <- datos[which(rowSums(datos) > 0),]
   
-  nu <- nrow(datos) # number of detected features
+  ceros = which(rowSums(datos) == 0)
+  hayceros = (length(ceros) > 0)
   
-  qq <- 1:nu
-    
-  data2plot = data.frame("%features" = 100*qq/nu)
+  if (hayceros) {
+    print(paste("Warning:", length(ceros), 
+                "features with 0 counts in all samples are to be removed for this analysis."))
+    datos = datos[-ceros,]
+  }  
   
-  for (i in 1:ncol(datos)) {
-    
-    acumu <- 100*cumsum(sort(datos[,i], decreasing = TRUE))/sum(datos[,i])
-          
-    data2plot = cbind(data2plot, acumu)    
+  
+  ## scaling data and/or changing 0 to k
+  if (norm) {
+    datos = sinceros(datos, k = NULL)
+  } else { 
+    datos = rpkm(datos, long = 1000, lc = 1, k = 0.5)
   }
   
   
-  colnames(data2plot)[-1] = colnames(datos)
   
+  ## to plot
+  data2plot = log2(datos / datos[,refColumn])
+  
+  if (is.numeric(refColumn)) refColumn = colnames(datos)[refColumn]
+  print(paste("Reference sample is:", refColumn))
   
   
   #### Diagnostic test
-  
-  KSpval = mostres = NULL
-  
-  for (i in 1:(ncol(datos)-1)) {
-    for (j in (i+1):ncol(datos)) {      
-      mostres = c(mostres, paste(colnames(datos)[c(i,j)], collapse = "_"))
-      #KSpval = c(KSpval, ks.test(datos[,i], datos[,j], alternative = "two.sided")$"p.value")
-      KSpval = c(KSpval, suppressWarnings(ks.test(datos[,i], datos[,j], alternative = "two.sided"))$"p.value")
-    }
-  }
-  
-  KSpval = p.adjust(KSpval, method = "fdr")
-  print("Summary of FDR adjusted p-values:")
-  print(summary(KSpval))
     
-  if (sum(KSpval < 0.05) > 0) {
+  MsinRef = data2plot[,-match(refColumn, colnames(data2plot))]
+  alpha = 0.05
+  alpha = alpha/ncol(MsinRef)
+  nperm = 10^3
+    
+  bootmed = sapply(1:nperm, function(k) {
+    permut = sample(1:nrow(MsinRef), replace = TRUE, nrow(MsinRef))
+    permut = MsinRef[permut,]
+    permut = apply(permut, 2, median)    
+    permut
+  })
+  
+  bootmed = t(apply(bootmed, 1, quantile, probs = round(c(alpha/2, 1 - alpha/2), 4)))
+  diagno = apply(bootmed, 1, 
+                 function (x) { 
+                   ddd =  (x[1] <= 0) * (0 <= x[2])
+                   if (ddd == 1) { ddd = "PASSED" } else { ddd = "FAILED"}
+                   ddd
+                   })
+  bootmed = cbind(bootmed, diagno)
+    
+  rownames(bootmed) = colnames(MsinRef)
+  colnames(bootmed)[3] = "Diagnostic Test"
+  print("Confidence intervals for median of M:")
+  print(bootmed)
+    
+  if ("FAILED" %in% bootmed[,3]) {
     print("Diagnostic test: FAILED. Normalization is required to correct this bias.")
-    print("According to Kolmogorov-Smirnov tests, at least a pair of samples have significantly different distributions")
-    print("Minimum adjusted p-value was: "); print(min(KSpval, na.rm = TRUE))
   }  else {
     print("Diagnostic test: PASSED.")
   }
@@ -71,8 +88,7 @@ cd.dat <- function (input) {
   
   #### Results
   
-  list("data2plot" = data2plot, 
-       "DiagnosticTest" = data.frame("ComparedSamples" = mostres, "KSpvalue" = KSpval))
+  list("data2plot" = data2plot, "refColumn" = refColumn, "DiagnosticTest" = bootmed)
    
 }
 
@@ -88,24 +104,32 @@ cd.dat <- function (input) {
 
 cd.plot <- function (dat, samples = NULL,...) {
   
+  refColumn = dat$refColumn
   dat = dat$data2plot
   
-  if (is.null(samples)) samples <- 1:(ncol(dat)-1)
-  if(length(samples) > 12) stop("Please select 12 samples or less to be plotted.")
+  if (is.null(samples)) samples <- 1:ncol(dat)
   
-  if (is.numeric(samples)) { samples = colnames(dat)[samples+1] }
+  if (is.numeric(samples)) { samples = colnames(dat)[samples] }
+  
+  samples = setdiff(samples, refColumn)
+  
+  if(length(samples) > 12) stop("Please select 12 samples or less to be plotted (excluding reference).")
       
+  dat = dat[,samples]
   
-  plot(dat[,1], dat[,samples[1]], xlab = "% features", ylab = "% reads",
-       type = "l", col = miscolores[1],...)
+  dat.dens = apply(dat, 2, density, adjust = 1.5)
+  limY = c(0,max(sapply(dat.dens, function (x) max(x$y, na.rm = TRUE))))
+  
+  plot(dat.dens[[1]], xlab = "M = log2(sample/refsample)", ylab = "Density", lwd = 2, ylim = limY,
+       type = "l", col = miscolores[1], main = paste("Reference sample:", refColumn), ...)
+  abline(v = median(dat[,1], na.rm = TRUE), col = miscolores[1], lty = 2)
   
   for (i in 2:length(samples)) {
-    
-    lines(dat[,1], dat[,samples[i]], col = miscolores[i])
-    
-  }  
+    lines(dat.dens[[i]], col = miscolores[i], lwd = 2)
+    abline(v = median(dat[,i], na.rm = TRUE), col = miscolores[i], lty = i+1)
+  }
 
-  legend("bottom", legend = samples, text.col = miscolores[1:length(samples)], bty = "n",
+  legend("topleft", legend = samples, text.col = miscolores[1:length(samples)], bty = "n",
          lty = 1, lwd = 2, col = miscolores[1:length(samples)])
 
 }

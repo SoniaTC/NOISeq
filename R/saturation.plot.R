@@ -176,6 +176,9 @@ saturation.dat <- function (input, k = 0, biotypes = NULL, ndepth = 6) {
 
 
 
+
+
+
 ##**************************************************************************#
 ##**************************************************************************#
 ##**************************************************************************#
@@ -185,7 +188,7 @@ saturation.dat <- function (input, k = 0, biotypes = NULL, ndepth = 6) {
 #### Saturation plot
 
 saturation.plot <- function(satdat, toplot = 1, samples = NULL,                            
-                            yrightlim = NULL, toreport = FALSE, ...) {
+                            yrightlim = NULL, toreport = FALSE, yleftlim = NULL, ...) {
 
   # satdat: Data coming from saturation.dat function
   # samples: Samples to be plotted. If NULL, all samples are plotted (Maximum = 12).
@@ -226,6 +229,7 @@ saturation.plot <- function(satdat, toplot = 1, samples = NULL,
   }
   
   legend = names(satdat$saturation[[1]])[samples]
+  if (toreport) legend = samples
 
   
   # colors
@@ -241,15 +245,16 @@ saturation.plot <- function(satdat, toplot = 1, samples = NULL,
 
   mybg <- colL
 
-
-  # yleftlim for plot and plot.y2
-  if (!exists("ylim")) {
-    yleftlim <- range(unlist(sat[samples]))
-  } else { yleftlim = ylim }
+  
 
   # xlim for plot
   xlim <- range(unlist(depth[samples])/10^6)
   
+  # yleftlim
+  if (is.null(yleftlim)) {
+    yleftlim <- range(unlist(sat[samples]))
+  } else { yleftlim = yleftlim }
+
 
   # Percentage of detections at maximum depth
   percen <- sapply(sat[samples], function(x) { round(100*max(x)/num, 1) })
@@ -269,10 +274,10 @@ saturation.plot <- function(satdat, toplot = 1, samples = NULL,
   if(!bars) {  # PLOT for detections without bars for new detections
 
     plot(depth[[samples[1]]]/10^6, sat[[samples[1]]], pch = 21, col = colL[1], #bg = mybg[1],
-         ylim = yleftlim, lwd = lwdL,
+         lwd = lwdL, ylim = yleftlim,
          xlim = xlim, main = main, type = "b", xlab = xlab,
          ylab = ylabL, cex.main = cex.main, cex.lab = cex.lab,
-         cex.axis = cex.axis,...)
+         cex.axis = cex.axis, ...)
 
     if (length(samples) > 1) {  # for more than 1 sample
 
@@ -301,7 +306,10 @@ saturation.plot <- function(satdat, toplot = 1, samples = NULL,
     }
     
     
+        
     if (!toreport) nf <- layout(matrix(c(1,2),2,1,byrow=TRUE),heights=c(0.8,0.2))
+    
+      
     par(mar = c(5, 4, 4, 4) + 0.1)
 
 
@@ -316,7 +324,7 @@ saturation.plot <- function(satdat, toplot = 1, samples = NULL,
             col2 = c(colR[2],colL[2]), cex.main = cex.main, #bg = mybg,
             cex.lab = cex.lab, cex.axis = cex.axis, cex = cex, ...)
     
-    points(real[samples,], pch = 21, col = colL, bg = mybg)
+    points(real, pch = 21, col = colL, bg = mybg)
 
     par(mar = c(0,0,0,0))
     plot(0,axes=FALSE,type="n")

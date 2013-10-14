@@ -18,6 +18,7 @@ CV = function(data) { 100 * sd(data, na.rm = TRUE) / mean(data, na.rm = TRUE) }
 filtered.data = function(dataset, factor, norm = TRUE, depth = NULL, method = 1, cv.cutoff = 100, cpm = 1) {
   
   dataset0 = dataset[rowSums(dataset) > 0,]
+  dataset = dataset0
   
   if ((method == 3) && (norm)) {
     if (is.null(depth)) {
@@ -36,13 +37,22 @@ filtered.data = function(dataset, factor, norm = TRUE, depth = NULL, method = 1,
   print("Filtering out low count features...")
   
   for (gg in grupos) {    
-    datos = as.matrix(dataset0[, grep(gg, factor)])
+    datos = as.matrix(dataset[, grep(gg, factor)])
     
     if (method == 1) {
-      cumple = cbind(cumple, (apply(datos, 1, CV) < cv.cutoff)*(rowMeans(datos) > cpm))
+      
+      if (ncol(datos) == 1) {
+        cumplecond = (datos > cpm)
+      } else {
+        cumplecond = (apply(datos, 1, CV) < cv.cutoff)*(rowMeans(datos) > cpm)
+        cumplecond[which(is.na(cumplecond) == TRUE)] = 0 
+      }
+      
+      cumple = cbind(cumple, cumplecond)
     } 
     
     if (method == 2) {
+      if (ncol(datos) == 1) stop("ERROR: At least 2 replicates per condition are requiered to apply this method.")
       mytest = apply(datos, 1, 
                      function (x) { 
                        suppressWarnings(wilcox.test(x, alternative = "greater", conf.int=FALSE, mu = 0))$"p.value" })

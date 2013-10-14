@@ -28,7 +28,7 @@ biodetection.dat <- function(input, factor = NULL, k = 0) {
     print(niveles)
     biotablas = vector("list", length = length(niveles))
     names(biotablas) = niveles
-    dat = sapply(niveles, function (k) rowSums(dat[,grep(k, mifactor)]))
+    dat = sapply(niveles, function (k) rowSums(as.matrix(dat[,grep(k, mifactor)])))
   }
   
     
@@ -73,6 +73,8 @@ biodetection.plot <- function(dat, samples = c(1,2), ...) {
     stop("ERROR: This function cannot generate plots for more than 2 samples.\n 
          Please, use it as many times as needed to generate the plots for all your samples.\n")
   }
+  
+  if (is.numeric(samples)) samples = names(dat$biotables)[samples]
     
   biotable1 <- rbind(dat$genome, dat$biotables[[samples[1]]], rep(0, length(dat$genome)))
   
@@ -121,12 +123,12 @@ biodetection.plot <- function(dat, samples = c(1,2), ...) {
     
     par(mar = c(11, 4, 2, 2))
     
-    barplot(biotable1[c(1,3),], main = names(dat$biotables)[samples[1]],
+    barplot(biotable1[c(1,3),], main = samples[1],
             xlab = NULL, ylab = "%features", axis.lty = 1, legend = FALSE,
             beside = TRUE, col = c("grey", 2), las = 2,
             ylim = c(0, ymaxL), border = c("grey", 2))
     
-    barplot(biotable1[c(2,4),], main = names(dat$biotables)[samples[1]],
+    barplot(biotable1[c(2,4),], main = samples[1],
             xlab = NULL, ylab = "%features", axis.lty = 1, legend = FALSE,
             beside = TRUE, col = c(2, 1), las = 2, density = 30,
             ylim = c(0, ymaxL), border = 2, add = TRUE)    
@@ -148,12 +150,12 @@ biodetection.plot <- function(dat, samples = c(1,2), ...) {
     par(mar = c(11, 4, 2, 2))    
     
     # Datos1
-    barplot(biotable1[c(1,3),], main = names(dat$biotables)[samples[1]],
+    barplot(biotable1[c(1,3),], main = samples[1],
             xlab = NULL, ylab = "%features", axis.lty = 1, legend = FALSE,
             beside = TRUE, col = c("grey", 2), las = 2,
             ylim = c(0, ymaxL), border = c("grey", 2))
     
-    barplot(biotable1[c(2,4),], main = names(dat$biotables)[samples[1]],
+    barplot(biotable1[c(2,4),], main = samples[1],
             xlab = NULL, ylab = "%features", axis.lty = 1, legend = FALSE,
             beside = TRUE, col = c(2, 1), las = 2, density = 30,
             ylim = c(0, ymaxL), border = 2, add = TRUE)
@@ -170,12 +172,12 @@ biodetection.plot <- function(dat, samples = c(1,2), ...) {
     
     
     # Datos2        
-    barplot(biotable2[c(1,3),], main = names(dat$biotables)[samples[2]],
+    barplot(biotable2[c(1,3),], main = samples[2],
             xlab = NULL, ylab = "%features", axis.lty = 1, legend = FALSE,
             beside = TRUE, col = c("grey", 4), las = 2,
             ylim = c(0, ymaxL), border = c("grey", 4))
     
-    barplot(biotable2[c(2,4),], main = names(dat$biotables)[samples[2]],
+    barplot(biotable2[c(2,4),], main = samples[2],
             xlab = NULL, ylab = "%features", axis.lty = 1, legend = FALSE,
             beside = TRUE, col = c(4, 1), las = 2, density = 30,
             ylim = c(0, ymaxL), border = 4, add = TRUE)

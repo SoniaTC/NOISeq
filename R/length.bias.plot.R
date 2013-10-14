@@ -113,7 +113,7 @@ length.dat <- function (input, factor = NULL)  {
         
         numdatos = length(long2)      
         numbins = floor(numdatos / numXbin)
-        misbins = quantile(long2, probs = seq(0,1,1/numbins))
+        misbins = quantile(long2, probs = seq(0,1,1/numbins), na.rm = TRUE)
         
         if (length(misbins) != length(unique(misbins))) {
           repes = names(table(misbins))[which(table(misbins) > 1)]
@@ -128,7 +128,7 @@ length.dat <- function (input, factor = NULL)  {
         miclasi = cut(long2, breaks = misbins, labels = FALSE)
         misbins = sapply(1:numbins, function (i) mean(misbins[i:(i+1)]))
         miclasi = misbins[miclasi]        
-        longexpr[[i]] = aggregate(datos2, by = list("lengthbin" = miclasi), mean, trim = 0.025)        
+        longexpr[[i]] = aggregate(datos2, by = list("lengthbin" = miclasi), mean, trim = 0.025, na.rm = TRUE)        
         
       } else {   # less than numXbin*10 genes in the biotype
         

@@ -9,7 +9,8 @@ setClass("Saturation", representation(dat="list"))
 
 setGeneric("explo.plot", function(object, ...) standardGeneric("explo.plot"))
 
-setMethod("explo.plot", "Biodetection", function(object, samples = c(1,2), ...) biodetection.plot(object@dat, samples = samples, ...))
+setMethod("explo.plot", "Biodetection", function(object, samples = c(1,2), ...) 
+  biodetection.plot(object@dat, samples = samples, ...))
 
 setMethod("explo.plot", "CD", function(object, samples = NULL, ...) cd.plot(object@dat, samples = samples, ...))
 
@@ -23,8 +24,8 @@ setMethod("explo.plot", "lengthbias", function(object, samples = NULL, toplot = 
           length.plot(object@dat, samples = samples, toplot = toplot, ...))
 
 setMethod("explo.plot", "Saturation",
-          function(object, toplot = 1, samples = NULL, yrightlim = NULL, ...)
-          saturation.plot(object@dat, toplot = toplot, samples = samples, yrightlim = yrightlim, ...))
+          function(object, toplot = 1, samples = NULL, yleftlim = NULL, yrightlim = NULL, ...)
+          saturation.plot(object@dat, toplot = toplot, samples = samples, yleftlim = yleftlim, yrightlim = yrightlim, ...))
 
 
 # Show methods for exploration objects
@@ -42,8 +43,10 @@ setMethod("show", "Biodetection",
 
 setMethod("show", "CD",
     function(object) {      
-      cat("\n FDR adjusted pvalues for Kolmogorov-Smirnov tests comparing each pair of samples:\n=======\n")
-      print((object@dat$DiagnosticTest))      
+      cat("\n Confidence intervals for median of M to compare each sample to reference:\n=======\n")
+      print(object@dat$DiagnosticTest)
+      cat("\n Reference sample is:\n=======\n")
+      print(object@dat$refColumn)
     })
 
 setMethod("show", "CountsBio",

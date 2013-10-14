@@ -211,7 +211,7 @@ plot.y2 <- function(x, yright, yleft, yrightlim = range(yright, na.rm = TRUE),
 
   ## Plotting RIGHT axis data
 
-  plot(x, yright, ylim = yrightlim, axes = FALSE, ylab = "", xlab = xlab,
+  plot(x, yright, axes = FALSE, ylab = "", xlab = xlab, ylim = yrightlim,
        xlim = xlim, pch = pch[1], type = type[1], lwd = lwd[1],
        col = col[1], ...)
   
@@ -237,7 +237,7 @@ plot.y2 <- function(x, yright, yleft, yrightlim = range(yright, na.rm = TRUE),
 
   ## Plotting LEFT axis data
   
-  plot(x, yleft, ylim = yleftlim, axes = FALSE, ylab = "" , xlab = xlab,
+  plot(x, yleft, axes = FALSE, ylab = "" , xlab = xlab, ylim = yleftlim, 
        xlim = xlim, bg = bg[1],
        pch = pch[2], type = type[2], lwd = lwd[2], col = col[2], ...)
   

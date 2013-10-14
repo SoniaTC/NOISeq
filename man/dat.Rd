@@ -9,7 +9,7 @@ Take the expression data and the feature annotations to generate the results tha
 }
 \usage{
 dat(input, type = c("biodetection","cd","countsbio","GCbias","lengthbias","saturation"), 
-                    k = 0, ndepth = 6, factor = NULL)
+                    k = 0, ndepth = 6, factor = NULL, norm = FALSE, refColumn = 1)
 }
 
 \arguments{
@@ -28,6 +28,12 @@ Number of different sequencing depths to be simulated and plotted. By default, n
   \item{factor}{
 If factor = NULL (default), the calculations are done for each sample independently. When the factor is specified, the calculations are done for each experimental condition. 
 Samples within the same condition are summed up ("biodetection") or averaged ("countsbio", "GCbias" and "lengthbias").
+}
+  \item{norm}{
+To indicate if provided data are already normalized (TRUE) or they are raw data (FALSE), which is the default. This parameter is only used by type "cd".
+}
+  \item{refColumn}{
+Column number in input data that is taken as the reference sample to compute M values. This parameter is only used by type "cd".
 }
 }
 

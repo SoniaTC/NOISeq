@@ -2,7 +2,7 @@ import(Biobase)
 
 export("noiseq","noiseqbio","readData","addData","dat",
 	"rpkm","tmm","uqua","degenes",
-	"DE.plot", "filtered.data")
+	"DE.plot", "filtered.data","QCreport")
 
 exportClasses("Output","Biodetection","CD","CountsBio","GCbias","lengthbias","Saturation")
 exportMethods("show", "explo.plot","dat2save")

@@ -50,11 +50,11 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL)  {
     print(niveles)
     datos = sapply(niveles, 
                    function (k) { 
-                     rowMeans(t(t(datos[,grep(k, mifactor)])/colSums(datos[,grep(k, mifactor)])))
+                     10^6 * rowMeans(t(t(datos[,grep(k, mifactor)])/colSums(as.matrix(datos[,grep(k, mifactor)]))))
                      })
     datos0 = sapply(niveles, 
                     function (k) { 
-                      rowMeans(t(t(datos0[,grep(k, mifactor)])/colSums(datos0[,grep(k, mifactor)])))
+                      10^6 * rowMeans(t(t(datos0[,grep(k, mifactor)])/colSums(as.matrix(datos0[,grep(k, mifactor)]))))
                     })
     colnames(datos) = colnames(datos0) = niveles
   }
@@ -67,7 +67,7 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL)  {
       infobio0 <- as.character(featureData(input)$Biotype)[-ceros] 
     } else { infobio0 =  as.character(featureData(input)$Biotype) }
     infobio <- as.character(featureData(input)$Biotype)
-  } else { infobio = NULL }  
+  } else { infobio0 = NULL; infobio = NULL }  
   
   if (!is.null(infobio)) {    
     if(is.null(biotypes)) {
@@ -86,8 +86,8 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL)  {
   
   
   # Create the summary matrix information
-  resumen = vector("list", length = length(bionum))
-  names(resumen) = names(bionum)
+  resumen = vector("list", length = length(bionum)+1)
+  names(resumen) = c("global", names(bionum))
   cuentas = c(0,1,2,5,10)
       
   for (i in 1:length(resumen)) { 
@@ -134,7 +134,7 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL)  {
 
 ## PLOT: Mean length for detected genes Plot according to BIOTYPES
 
-countsbio.plot <- function (dat, toplot = "global", samples = NULL, plottype = c("barplot", "boxplot"), ...) {
+countsbio.plot <- function (dat, toplot = "global", samples = NULL, plottype = c("barplot", "boxplot"),...) {
 
   # dat: Data coming from countsbio.dat function
   # samples: Samples to be plotted. If NULL, all samples are plotted.
@@ -196,11 +196,12 @@ countsbio.plot <- function (dat, toplot = "global", samples = NULL, plottype = c
     if (is.numeric(samples)) colnames(conteos) = colnames(dat$result)[samples]
     else colnames(conteos) = samples
     num <- dat$bionum[toplot]
+    if (is.null(num)) num = 0
     infobio = dat$biotypes
     
-    if (num == 0) stop("Error: No data available. Please, change toplot parameter.")
+    if (num == 0 && toplot != "global") stop("Error: No data available. Please, change toplot parameter.")
     
-    if (!exists("ylim")) ylim = range(na.omit(log2(1+conteos)))
+    #if (!exists("ylim")) ylim = range(na.omit(log2(1+conteos)))
     if (!exists("ylab")) ylab = "Expression values"
     
     ## Plots  
@@ -210,11 +211,11 @@ countsbio.plot <- function (dat, toplot = "global", samples = NULL, plottype = c
       escala = logscaling(conteos, base = 2)
       
       if (is.null(infobio)) {
-        boxplot(escala$data, col = miscolores[1], ylim = ylim, ylab = ylab,
+        boxplot(escala$data, col = miscolores[1], ylab = ylab, #ylim = ylim,
                 main = "", yaxt = "n", ...)
       } else {
         par(mar = c(10, 4, 4, 2))  
-        boxplot(escala$data ~ infobio, col = miscolores, ylim = ylim, ylab = ylab,
+        boxplot(escala$data ~ infobio, col = miscolores, ylab = ylab, #ylim = ylim,
                 main = colnames(conteos), las = 2, cex.axis = 0.8, cex.lab = 0.9, yaxt = "n", ...)
         cuantos = dat$bionum[-1]
         cuantos = cuantos[sort(names(cuantos))]
@@ -229,7 +230,7 @@ countsbio.plot <- function (dat, toplot = "global", samples = NULL, plottype = c
       main <- paste(toupper(toplot), " (", num, ")", sep = "")
       
       par(mar = c(6, 4, 2, 2))  
-      boxplot(escala$data, col = miscolores, ylim = ylim, ylab = ylab,
+      boxplot(escala$data, col = miscolores, ylab = ylab, #ylim = ylim,
               main = main, las = 2, cex.lab = 0.9, cex.axis = 0.8, yaxt = "n", ...)       
     }
     

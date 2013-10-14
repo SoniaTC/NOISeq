@@ -113,7 +113,7 @@ GC.dat <- function (input, factor = NULL)  {
         
         numdatos = length(GC2)      
         numbins = floor(numdatos / numXbin)
-        misbins = quantile(GC2, probs = seq(0,1,1/numbins))
+        misbins = quantile(GC2, probs = seq(0,1,1/numbins), na.rm = TRUE)
         
         if (length(misbins) != length(unique(misbins))) {
           repes = names(table(misbins))[which(table(misbins) > 1)]
@@ -128,7 +128,7 @@ GC.dat <- function (input, factor = NULL)  {
         miclasi = cut(GC2, breaks = misbins, labels = FALSE)
         misbins = sapply(1:numbins, function (i) mean(misbins[i:(i+1)]))
         miclasi = misbins[miclasi]        
-        GCexpr[[i]] = aggregate(datos2, by = list("GCbin" = miclasi), mean, trim = 0.025)        
+        GCexpr[[i]] = aggregate(datos2, by = list("GCbin" = miclasi), mean, trim = 0.025, na.rm = TRUE)        
         
       } else {   # less than numXbin*10 genes in the biotype
         

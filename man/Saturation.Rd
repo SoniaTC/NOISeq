@@ -1,6 +1,7 @@
 \name{Saturation}
 \alias{Saturation-class}
 \alias{Saturation}
+\alias{saturation}
 \alias{explo.plot,Saturation-method}
 \alias{show,Saturation-method}
 \alias{dat2save,Saturation-method}
@@ -13,7 +14,7 @@ increasing sequencing depths and also the new detections per each million of new
 }
 
 \usage{
-\S4method{explo.plot}{Saturation}(object, toplot = 1, samples = NULL, yrightlim = NULL, ...)
+\S4method{explo.plot}{Saturation}(object, toplot = 1, samples = NULL, yleftlim = NULL, yrightlim = NULL, ...)
 \S4method{dat2save}{Saturation}(object)
 }
 
@@ -29,7 +30,11 @@ increasing sequencing depths and also the new detections per each million of new
   \item{samples}{
     The samples to be plotted. If NULL, all the samples are plotted for Saturation object.
   }
- 
+
+  \item{yleftlim}{
+    Range for Y left-axis (on the left-hand side of the plot) when new detections are plotted (this occurs when the number of samples to be plotted is 1 or 2). 
+If NULL (default), an appropriate range is computed.    
+    } 
   \item{yrightlim}{
     Range for Y right-axis (on the right-hand side of the plot) when new detections are plotted (this occurs when the number of samples to be plotted is 1 or 2). 
 If NULL (default), an appropriate range is computed.    

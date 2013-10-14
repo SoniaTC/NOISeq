@@ -30,7 +30,7 @@
 \author{Sonia Tarazona (\texttt{starazona@cipf.es})\\Pedro Furió-Tarí (\texttt{pfurio@cipf.es})\\Alberto Ferrer (\texttt{aferrer@eio.upv.es})\\Ana Conesa (\texttt{aconesa@cipf.es})}
 % Please increment date when working on this document, so that
 % date shows genuine change date, not merely date of compile.
-\date{25 July 2013 \\(Version 2.0.0)}
+\date{14 October 2013 \\(Version 2.2.0)}
 \maketitle
 
 
@@ -189,6 +189,8 @@ In this section, we present a set of plots to explore the count data that may be
 can be chosen. For instance, these plots will be useful for seeing which kind of features (e.g. genes) are being detected in our RNA-seq samples and with how many counts, which
 technical biases are present, etc. 
 
+As it will be seen at the end of this section, it is also possible to generate a report in a pdf file including all these exploratory plots for the comparison of two samples or two experimental conditions.
+
 
 
 \subsection{Generating data for exploratory plots}
@@ -293,14 +295,14 @@ each sequencing depth.
 
 <<fig_sat1,fig=TRUE>>=
 mysaturation = dat(mydata, k = 0, ndepth = 7, type = "saturation")
-explo.plot(mysaturation, toplot = 1, samples = 1:2, yrightlim = NULL)
+explo.plot(mysaturation, toplot = 1, samples = 1:2, yleftlim = NULL, yrightlim = NULL)
 @
 <<fig_sat2,fig=TRUE>>=
-explo.plot(mysaturation, toplot = "protein_coding", samples = 1:4, yrightlim = NULL)
+explo.plot(mysaturation, toplot = "protein_coding", samples = 1:4)
 @ 
 
 The plot in Fig. \ref{fig_sat1} has been computed for all the features (without specifying a biotype) and for two of the samples. Left Y axis shows the number of detected genes
-with more than 0 counts at each sequencing depth, represented by the lines. The right end of the lines corresponds to the total available sequencing depth. The other sequencing
+with more than 0 counts at each sequencing depth, represented by the lines. The solid point in each line corresponds to the real available sequencing depth. The other sequencing
 depths are simulated from this total sequencing depth. The bars are associated to the right Y axis and show the number of new features detected per million of new sequenced reads
 at each sequencing depth. The legend in the gray box also indicates the percentage of total features detected with more than $k=0$ counts.
 
@@ -430,30 +432,38 @@ explo.plot(myGCbias, samples = NULL, toplot = "global")
 
 \subsubsection{RNA composition}
 
-When two samples have different RNA composition, the distribution of sequencing reads across the features is also different in such a way that although if a feature had the same
-number of read counts in both samples, it would not mean to be equally expressed in both. To check if the distribution of counts is similar for all samples, the ``cd" plot
-and diagnostic test can be used. A Kolmogorov-Smirnov test is conducted for each pair of samples and the minimum FDR-adjusted p-value is displayed on screen. It can also be
-visualized by using \code{show} function. If any of the p-values is significant, it means that one or more pairs of samples have different RNA composition and the data should be
-normalized before computing differential expression.
+When two samples have different RNA composition, the distribution of sequencing reads across the features is different in such a way that although a feature had the same
+number of read counts in both samples, it would not mean that it was equally expressed in both. To check if this bias is present in the data, the ``cd" plot
+and the correponding diagnostic test can be used. In this case, each sample $s$ is compared to the reference sample $r$ (which can be arbitrarily chosen). To do that, M values are computed as $log2(counts_s=counts_r)$. If no bias is present, it should be expected that the median of M values for each comparison is 0. Otherwise, it would
+be indicating that expression levels in one of the samples tend to be higher than in the other, and this could
+lead to false discoveries when computing differencial expression. Confidence intervals for the M median are also computed by bootstrapping. If value 0 does not fall inside the interval, it means that the deviation of the sample with regard to the reference sample is statistically significant. Therefore, a normalization procedure such as Upper Quartile or
+TMM should be used to correct this effect and make the samples comparable before computing differential expression. Confidence intervals can be visualized by using \code{show} function. 
 
-See below an usage example and the resulting plot in Fig. \ref{fig_countdistr}. Additional plot parameters may be used to modify some aspects of the plot 
-(e.g. \code{xlim} parameter in this case).
+See below an usage example and the resulting plot in Fig. \ref{fig_countdistr}. It must be indicated if the data provided are already normalized (norm = TRUE) or not (norm = FALSE). The reference sample may be indicated with the refColumn parameter (by default, the first column is used). Additional plot parameters may also be used to modify some aspects of the plot.
 <<fig_countdistr,fig=TRUE>>=
-mycd = dat(mydata, type = "cd")
-explo.plot(mycd, xlim = c(0,80))
+mycd = dat(mydata, type = "cd", norm = FALSE, refColumn = 1)
+explo.plot(mycd)
 @ 
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.5\textwidth]{NOISeq-fig_countdistr}
-\caption{Count distribution plot}
+\caption{RNA composition plot}
 \label{fig_countdistr}
 \end{figure}
 
-In the plot can be seen that the distributions are different for kidney and liver samples. For example, in kidney 20\% of the genes account for about 65\% of the reads, while
-in liver they account for more than 80\% of the reads.
+In the plot can be seen that the M median is deviated from 0 in most of the cases. This is corraborated by the confidence intervals for the M median.
 
 % \clearpage
+
+
+\subsection{Quality Control report}
+
+The \code{QCreport} function allows the user to quickly generate a pdf report showing the exploratory plots described in this section to compare either two samples (if \code{factor} is NULL) or two experimental conditions (if \code{factor} is indicated). Depending on the biological information provided (biotypes, length or GC content), the number of plots included in the report may differ. 
+
+<<QCreportExample,results=hide>>=
+QCreport(mydata, samples = NULL, factor = "Tissue")
+@ 
 
 
 
@@ -646,7 +656,7 @@ myresults <- noiseq(mydata, factor = "Tissue", k = NULL, norm="n", pnr = 0.2,
 
 \subsubsection{NOISeqBIO} \label{sec_param2}
 
-NOISeqBIO was developed by joining the philosophy of our previous work together with the ideas from Efron \emph{et al.} in
+NOISeqBIO is optimized for the use on biological replicates (at least 2 per condition). It was developed by joining the philosophy of our previous work together with the ideas from Efron \emph{et al.} in
 \cite{Efron2001}. In our case, we define the differential expression statistic $\theta$ as $(M+D)/2$, where $M$ and $D$ are the statistics defined in the previous section but
 including a correction for the biological variability of the corresponding feature. The probability
 distribution of $\theta$ can be described as a mixture of two distributions: one for features changing between conditions and the other

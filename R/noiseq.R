@@ -78,7 +78,7 @@ function (input, k = 0.5, norm = c("rpkm","uqua","tmm","n"),
   resultat <- data.frame(resultat, "ranking" = ranking(resultat)$statistic)
   if (!is.null(featureData(input)@data$Length))
     resultat <- data.frame(resultat, "Length" = as.numeric(as.character(featureData(input)@data[todos,"Length"])))  
-  if (!is.null(featureData(input)@data$Length))
+  if (!is.null(featureData(input)@data$GC))
     resultat <- data.frame(resultat, "GC" = as.numeric(as.character(featureData(input)@data[todos,"GC"])))  
   if (!is.null(featureData(input)@data$Chromosome))
     resultat <- data.frame(resultat, "Chrom" = as.character(featureData(input)@data$Chromosome),
