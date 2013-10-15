@@ -58,7 +58,7 @@ data2report = function(input, factor = NULL, norm = FALSE) {
 QCreport = function (input, file = NULL, samples = NULL, factor = NULL) {
 
   if (is.null(file))
-	file <- paste("QCreport", format(Sys.time(), "_%Y%b%d_%H:%M:%S"), ".pdf", sep = "")  
+	file <- paste("QCreport", format(Sys.time(), "_%Y%b%d_%H_%M_%S"), ".pdf", sep = "")  
 
   QCinfo = data2report(input = input, factor = factor)
   
