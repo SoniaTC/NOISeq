@@ -20,6 +20,7 @@ explo.plot(object, ...)
   \item{object}{
 Object generated with \code{dat()} function.
 }
+
   \item{...}{
     Any argument from \code{par}.
   }
@@ -36,7 +37,7 @@ Sonia Tarazona
 
 
 \seealso{
-       \code{\link{readData}}, \code{\link{addData}}, \code{\link{dat}}.
+       \code{\link{Biodetection}},\code{\link{CD}},\code{\link{CountsBio}},\code{\link{GCbias}},\code{\link{lengthbias}},\code{\link{Saturation}}, \code{\link{readData}}, \code{\link{addData}}, \code{\link{dat}}.
      }
 
 \examples{

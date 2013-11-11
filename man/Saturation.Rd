@@ -14,7 +14,7 @@ increasing sequencing depths and also the new detections per each million of new
 }
 
 \usage{
-\S4method{explo.plot}{Saturation}(object, toplot = 1, samples = NULL, yleftlim = NULL, yrightlim = NULL, ...)
+\S4method{explo.plot}{Saturation}(object, samples = NULL, toplot = 1, yleftlim = NULL, yrightlim = NULL, ...)
 \S4method{dat2save}{Saturation}(object)
 }
 

@@ -9,11 +9,13 @@
 
 \description{
 CountsBio class generated from dat() function with
-type="countsbio". This object contains the count distribution for each biological group and also for increasing sequencing depths.
+type="countsbio". This object contains the count distribution for each biological group 
+and also the percentage of features with counts per million higher than 0, 1, 2, 5 or 10,
+per each sample independently and in at least one of the samples (total).
 }
 
 \usage{
-\S4method{explo.plot}{CountsBio}(object, toplot = 1, samples = NULL, plottype = c("barplot", "boxplot"), ...)
+\S4method{explo.plot}{CountsBio}(object, samples = c(1,2), toplot = "global", plottype = c("barplot", "boxplot"),...)
 \S4method{dat2save}{CountsBio}(object)
 }
 
@@ -31,8 +33,7 @@ type="countsbio". This object contains the count distribution for each biologica
     Samples or conditions to be plotted. If NULL, the two first samples are plotted because the plot for this object only admit a maximum of two samples.
   }
   \item{plottype}{
-    Type of plot to be generated for "countsbio" data. If "barplot", the plot indicates for each sample or condition the number of features with 0 counts, 1 count or less, 
-2 counts or less, 5 counts or less and 10 counts or less. Above each bar, the sequencing depth (million reads) is shown. 
+    Type of plot to be generated for "countsbio" data. If "barplot", the plot indicates the percentage of features with counts per millior higher than 0, 1, 2, 5 or 10 counts or less. Above each bar, the sequencing depth (million reads) is shown. 
 If "boxplot", a boxplot is drawn per sample or condition showing the count distribution for features with more than 0 counts. 
 Both types of plot can be obtained for all features ("global") or for a specified biotype (when biotypes are available).
   }

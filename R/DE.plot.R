@@ -13,15 +13,30 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom","distr"),
   ## MD plot
   if (graphic == "MD") {
     
-    if (noiseqbio) {
-      stop("ERROR: MD plot cannot be generated for noiseqbio results.\n")
-    }       
-    
-    plot(output@results[[1]][,c("M","D")], pch = pch, xlab = "M", ylab = "D", cex = cex, col = col,...)
-
-    if(!is.null(q))
-      mySelection = rownames(degenes(output,q))
-      points(output@results[[1]][mySelection,c("M","D")], col = col.sel, pch = pch.sel, cex = cex.sel)
+    if (noiseqbio) {      
+      
+      M = output@results[[1]][,"log2FC"]
+      D = abs(output@results[[1]][,1] - output@results[[1]][,2])+1
+      names(M) = names(D) = rownames(output@results[[1]])
+      
+      plot(M, D, pch = pch, xlab = "M", ylab = "D", cex = cex, col = col, log = "y",...)
+      
+      if(!is.null(q)) {
+        mySelection = rownames(degenes(output,q))
+        points(M[mySelection], D[mySelection], col = col.sel, pch = pch.sel, cex = cex.sel)        
+      }     
+      
+    } else {
+      
+      plot(output@results[[1]][,"M"], (1+output@results[[1]][,"D"]), pch = pch, 
+           xlab = "M", ylab = "D", cex = cex, col = col, log = "y",...)
+      
+      if(!is.null(q)) {
+        mySelection = rownames(degenes(output,q))
+        points(output@results[[1]][mySelection,c("M","D")], col = col.sel, pch = pch.sel, cex = cex.sel)
+      }      
+      
+    }          
 
   } 
   
@@ -38,8 +53,7 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom","distr"),
       k <- min(data, na.rm=TRUE)
       escala = logscaling(data, base = 2, k = k)
       
-      plot(escala$data, main = "Expression data",
-           pch = pch, cex = cex, col = col, yaxt = "n", xaxt = "n",...)
+      plot(escala$data, pch = pch, cex = cex, col = col, yaxt = "n", xaxt = "n",...)
       axis(side = 1, at = escala$at, labels = escala$labels)
       axis(side = 2, at = escala$at, labels = escala$labels)
       
@@ -51,7 +65,7 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom","distr"),
       
     } else {
       
-      plot(data, main = "Expression data", pch = pch, cex = cex, col = col,...)
+      plot(data, pch = pch, cex = cex, col = col,...)
       
       if(!is.null(q)) {
         

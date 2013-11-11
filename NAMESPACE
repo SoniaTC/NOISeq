@@ -1,4 +1,5 @@
 import(Biobase)
+import(methods)
 
 export("noiseq","noiseqbio","readData","addData","dat",
 	"rpkm","tmm","uqua","degenes",

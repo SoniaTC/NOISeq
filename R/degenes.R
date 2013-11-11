@@ -1,5 +1,5 @@
 degenes <-
-function (object, q = 0.9, M = NULL) {
+function (object, q = 0.95, M = NULL) {
   # object = noiseq output object
   # M = "up" (up-regulated in condition 1), "down" (down-regulated in condition 1), NULL (all differentially expressed genes)
   # q = probability threshold (between 0 and 1)

@@ -4,7 +4,7 @@
 \docType{methods}
 
 \title{
-Saving data generated for exploratory plots
+Saving data generated for exploratory plots.
 }
 
 \description{

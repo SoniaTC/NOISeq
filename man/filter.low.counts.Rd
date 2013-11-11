@@ -22,12 +22,12 @@ Vector or factor indicating which condition each sample (column) in dataset belo
 Logical value indicating whether the data are already normalized (TRUE) or not (FALSE).
 }
   \item{depth}{
-Sequencing depth of samples (column totals before normalizing the data). When norm=FALSE, depth does not need to be provided. 
+Sequencing depth of samples (column totals before normalizing the data). Depth only needs to be provided when method = 3  and norm = TRUE. 
 }
 \item{method}{
 Method must be one of 1,2 or 3. 
 Method 1 (CPM) removes those features that have an average expression per condition less than cpm value  
-and a coefficient of variation per condition higher than cv.cutoff in all the conditions.
+and a coefficient of variation per condition higher than cv.cutoff (in percentage) in all the conditions.
 Method 2 (Wilcoxon) performs a Wilcoxon test per condition and feature where in the null hypothesis the median expression is 0 and
 in the alternative the median is higher than 0. Those features with p-value greater than 0.05 in all the conditions are removed.
 Method 3 (Proportion test) performs a proportion test on the counts per condition and feature (or pseudo-counts if data were normalized) 
@@ -35,7 +35,7 @@ where null hypothesis is that the feature relative expression (count proportion)
 Those features with p-value greater than 0.05 in all the conditions are removed.
 }
 \item{cv.cutoff}{
-Cutoff for the coefficient of variation per condition to be used in method 1.
+Cutoff for the coefficient of variation per condition to be used in method 1 (in percentage).
 }
 \item{cpm}{
 Cutoff for the counts per million value to be used in methods 1 and 3.

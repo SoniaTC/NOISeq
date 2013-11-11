@@ -9,7 +9,7 @@ Differential expression method for biological replicates
 }
 \usage{
 noiseqbio(input, k = 0.5, norm = c("rpkm","uqua","tmm","n"), nclust = 15, plot = FALSE,
-                      factor=NULL, conditions = NULL, lc = 1, r = 50, adj = 1.5,
+                      factor=NULL, conditions = NULL, lc = 0, r = 50, adj = 1.5,
                       a0per = 0.9, random.seed = 12345, filter = 1, depth = NULL,
                       cv.cutoff = 500, cpm = 1)
 }
@@ -32,7 +32,7 @@ A string indicating the name of factor whose levels are the conditions to be com
 A vector containing the two conditions to be compared by the differential expression algorithm (needed when the \code{factor} contains more than 2 different conditions).
 }
   \item{lc}{
-Length correction is done by dividing expression by length^lc. By default, lc = 1.
+Length correction is done by dividing expression by length^lc. By default, lc = 0.
 }
   \item{r}{
 Number of permutations to generate noise distribution by resampling.

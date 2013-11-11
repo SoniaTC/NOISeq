@@ -10,7 +10,7 @@
 \description{
 GCbias class generated from dat() function with type="GCbias". 
 This object contains the trimmed mean of expression for each GC content bin of 200 features per sample or condition and also per biotype (if available). 
-It also includes the corresponding spline regression models fitted to explain the relationship between length and expression.
+It also includes the corresponding spline regression model fitted to explain the relationship between length and expression.
 }
 
 \usage{

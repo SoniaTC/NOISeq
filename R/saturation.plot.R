@@ -14,10 +14,6 @@ saturation.dat <- function (input, k = 0, biotypes = NULL, ndepth = 6) {
   if (inherits(input,"eSet") == FALSE)
     stop("Error. You must give an eSet object\n")
 
-#   if (any(!is.na(featureData(input)$Biotype)) == FALSE)      
-#     stop ("No biological classification provided.\nPlease run addData() function to add 
-#           this information\n")
-
   if (!is.null(assayData(input)$exprs))
     datos <- assayData(input)$exprs
   else
@@ -27,8 +23,7 @@ saturation.dat <- function (input, k = 0, biotypes = NULL, ndepth = 6) {
     infobio <- featureData(input)$Biotype    
   } else { infobio = NULL }
   
-  
-  
+    
   nsam <- NCOL(datos)
 
   if (!is.null(infobio)) {    
@@ -161,7 +156,7 @@ saturation.dat <- function (input, k = 0, biotypes = NULL, ndepth = 6) {
   for (i in 1:length(real)) {
     real[[i]] = data.frame("depth" = realdepth,
                            "detec" = sapply(satura[[i]], function (x) x[ndepth1+1]))
-    rownames(real[[i]], colnames(datos))
+    rownames(real[[i]]) = colnames(datos)
   }
   
 
@@ -187,7 +182,7 @@ saturation.dat <- function (input, k = 0, biotypes = NULL, ndepth = 6) {
 
 #### Saturation plot
 
-saturation.plot <- function(satdat, toplot = 1, samples = NULL,                            
+saturation.plot <- function(satdat, samples = NULL, toplot = 1, 
                             yrightlim = NULL, toreport = FALSE, yleftlim = NULL, ...) {
 
   # satdat: Data coming from saturation.dat function
@@ -256,8 +251,8 @@ saturation.plot <- function(satdat, toplot = 1, samples = NULL,
   } else { yleftlim = yleftlim }
 
 
-  # Percentage of detections at maximum depth
-  percen <- sapply(sat[samples], function(x) { round(100*max(x)/num, 1) })
+  # Percentage of detections at real depth
+  percen <- round(100*real[,"detec"]/num, 1)
 
 
   # Drawing new detections bars?    

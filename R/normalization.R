@@ -1,10 +1,12 @@
-tmm = function (datos, long = 1000, lc = 1, k = 0, refColumn = 1,
+#######################
+
+tmm = function (datos, long = 1000, lc = 0, k = 0, refColumn = 1,
                 logratioTrim = .3, sumTrim = 0.05, doWeighting = TRUE,
                 Acutoff = -1e10) {
   
   # lc: Length correction. Expression is divided by long^lc. lc can be any real number.
   
-  L <- long^lc
+  L <- (long/1000)^lc
   
   total <- colSums(as.matrix(datos))
   
@@ -18,7 +20,7 @@ tmm = function (datos, long = 1000, lc = 1, k = 0, refColumn = 1,
           
     fk = fk * total
     
-    datos.norm <- (t(t(datos0)/fk)*10^9)/L
+    datos.norm <- (t(t(datos0)/fk)*10^6)/L
     
   } else {
     
@@ -34,14 +36,13 @@ tmm = function (datos, long = 1000, lc = 1, k = 0, refColumn = 1,
 #######################
 
 
-rpkm <-
-function (datos, long = 1000, lc = 1, k = 0) {
+rpkm <- function (datos, long = 1000, lc = 1, k = 0) {
 
   total <- colSums(as.matrix(datos))
 
   datos0 <- sinceros(datos, k)                   
 
-  datos.norm <- (t(t(datos0)/total)*10^9)/(long^lc)
+  datos.norm <- (t(t(datos0)/total)*10^6)/((long/1000)^lc)
   
   na.omit(datos.norm)   
 }
@@ -50,12 +51,11 @@ function (datos, long = 1000, lc = 1, k = 0) {
 ##################################
 
 
-uqua <-
-function (datos, long = 1000, lc = 1, k = 0) {
+uqua <- function (datos, long = 1000, lc = 0, k = 0) {
   
 # lc: Length correction. Expression is divided by long^lc. lc can be any real number.
 
-  L <- long^lc
+  L <- (long/1000)^lc
 
   datos0 <- sinceros(datos, k)
 
@@ -73,7 +73,7 @@ function (datos, long = 1000, lc = 1, k = 0) {
     q3 <- apply(datitos, 2, quantile, probs = 0.75)
     d <- q3*supertot/sum(q3)
 
-    datos.norm <- (t(t(datos0)/d)*10^9)/L
+    datos.norm <- (t(t(datos0)/d)*10^6)/L
 
   } else {
 

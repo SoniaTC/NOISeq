@@ -25,3 +25,13 @@ version 2.2.0 (2013-10-14)
  - New function to generate a Quality Control Report in PDF format including all the exploratory plots.
  - Plot to evaluate RNA composition bias has been changed.
  - Some bugs have been fixed.
+
+version 2.3.3 (2013-11-4)
+ - The "CountsBio" barplot has been modified.
+ - User's guide and Reference manual have been improved.
+ - A bug in "Saturation" plot has been fixed.
+ - Normalization function has been modified so the user may choose the possibility of not applying a length correction although the length is provided.
+ - NOISeqBIO results now include the log fold change (log2FC).
+ - MD plot is now available also for NOISeqBIO results and D is plotted in log-scale.
+
+

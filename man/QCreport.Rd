@@ -16,7 +16,7 @@ QCreport(input, file = NULL, samples = NULL, factor = NULL)
 Object of eSet class coming from \code{\link{readData}} function or other R packages such as DESeq.
 }
   \item{file}{
-Name of the pdf file containing the generated report. It should be in this format: "filename.pdf". The default name is like this: "QCreport_2013Sep26_15:58:16.pdf".
+String indicating the name of the PDF file that will contain the report. It should be in this format: "filename.pdf". The default name is like this: "QCreport_2013Sep26_15:58:16.pdf".
 }
   \item{samples}{
 Vector with the two samples to be compared in the report when "factor" is NULL. If "factor" is not NULL and has more than two levels, samples has to indicate the two conditions to be compared. It can be numeric or character (when names of samples or conditions are provided).

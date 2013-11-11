@@ -2,13 +2,13 @@
 \alias{degenes}
 
 \title{
-Recovering differencially expressed features
+Recovering differencially expressed features.
 }
 \description{
 Recovering differencially expressed features for a given threshold from \code{noiseq} or \code{noiseqbio} output objects.
 }
 \usage{
-degenes(object, q = 0.9, M = NULL)
+degenes(object, q = 0.95, M = NULL)
 }
 
 \arguments{
@@ -16,7 +16,7 @@ degenes(object, q = 0.9, M = NULL)
 Object of class \code{\link{Output}}.
 }
   \item{q}{
-Value for the probability threshold.
+Value for the probability threshold (by default, 0.95).
 }
   \item{M}{
 String indicating if all differentially expressed features are to be returned or only up or down-regulated features. The possible values are:

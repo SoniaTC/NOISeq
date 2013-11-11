@@ -1,6 +1,5 @@
-allMD <-
-function (input, factor, conditions, k = 0.5, replicates, norm = "rpkm",
-            pnr = 0.2, nss = 5, v = 0.02, lc = 1)
+allMD <- function (input, factor, conditions, k = 0.5, replicates, norm = "rpkm",
+            pnr = 0.2, nss = 5, v = 0.02, lc = 0)
 
 # input:  Set of data of type Input
 

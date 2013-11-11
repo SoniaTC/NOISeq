@@ -9,7 +9,7 @@ Differential expression method for technical replicates or no replicates at all
 }
 \usage{
 noiseq(input, k = 0.5, norm = c("rpkm","uqua","tmm","n"), replicates = c("technical","biological","no"), 
-factor=NULL, conditions=NULL, pnr = 0.2, nss = 5, v = 0.02, lc = 1)
+factor=NULL, conditions=NULL, pnr = 0.2, nss = 5, v = 0.02, lc = 0)
 }
 
 \arguments{
@@ -34,7 +34,7 @@ Normalization method. It can be one of "rpkm" (default), "uqua"
 }
   \item{lc}{
 Length correction is done by dividing expression by length^lc.
-By default, lc = 1.
+By default, lc = 0.
 }
   \item{pnr}{
 Percentage of the total reads used to simulated each sample when no replicates are available. By default, pnr = 0.2.

@@ -155,7 +155,7 @@ QCreport = function (input, file = NULL, samples = NULL, factor = NULL) {
   
   empiezo = empiezo-bajo
   text(lugares[1], empiezo, "Expression barplot", adj = 0, font = 2, cex = 1)
-  text(lugares[2], empiezo, "Number of genes with 0, <=1, <=2, <=5 or <=10 counts per million in each sample/condition.", adj = 0, font = 1, cex = 1)
+  text(lugares[2], empiezo, "Percentage of genes with >0, >1, >2, >5 or >10 counts per million in each sample/condition.", adj = 0, font = 1, cex = 1)
   
   empiezo = empiezo-bajo
   text(lugares[1], empiezo, "Length bias", adj = 0, font = 2, cex = 1)

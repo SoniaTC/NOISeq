@@ -20,6 +20,8 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL)  {
     datos <- assayData(input)$counts
   
   
+  depth = round(colSums(datos)/10^6,1); names(depth) = colnames(datos)
+  
   ceros = which(rowSums(datos) == 0)
   hayceros = (length(ceros) > 0)
     
@@ -57,6 +59,7 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL)  {
                       10^6 * rowMeans(t(t(datos0[,grep(k, mifactor)])/colSums(as.matrix(datos0[,grep(k, mifactor)]))))
                     })
     colnames(datos) = colnames(datos0) = niveles
+    depth = sapply(niveles, function (k) paste(range(depth[grep(k, mifactor)]), collapse = "-"))
   }
   
   
@@ -86,27 +89,50 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL)  {
   
   
   # Create the summary matrix information
-  resumen = vector("list", length = length(bionum)+1)
-  names(resumen) = c("global", names(bionum))
+  if (is.null(bionum)) {
+    resumen = vector("list", length = 1)
+    names(resumen) = "global"
+  } else {
+    resumen = vector("list", length = length(bionum))
+    names(resumen) = names(bionum)
+  }
+  
   cuentas = c(0,1,2,5,10)
+  
+  if (is.null(factor)) {
+    datosCPM = 10^6 * t(t(datos)/colSums(as.matrix(datos)))
+  } else { datosCPM = datos }
       
   for (i in 1:length(resumen)) { 
+    
     if (i == 1) { 
-      datosR = datos 
+      datosR = datosCPM       
     } else {       
       if(!is.null(infobio)) {
-        datosR = datos[which(infobio == names(resumen)[i]),]
+        datosR = datosCPM[which(infobio == names(resumen)[i]),]
         if (class(datosR) !=  "matrix") { datosR = t(as.matrix(datosR)) } 
       }
     }
     
+    
+    nfeatures = nrow(datosR)
+    datosR = datosR[which(rowSums(datosR) > 0),] 
+    if (class(datosR) !=  "matrix") { datosR = t(as.matrix(datosR)) }
+    
+    myglobal = NULL
+    mypersample = NULL
+    
+    for (kk in 1:length(cuentas)) {
+      mypersample = rbind(mypersample, apply(datosR, 2, function (x) { length(which(x > cuentas[kk])) }))
+      myglobal = c(myglobal, sum(apply(datosR, 1, function (x) { max(x) > cuentas[kk] })))
+    }    
+    
+    mypersample = round(100*mypersample/nfeatures, 1)
+    mypersample = rbind(mypersample, depth)
+    rownames(mypersample) = 1:nrow(mypersample)
+    myglobal = c(round(100*myglobal/nfeatures, 1), nfeatures)
         
-    numeros = t(sapply(cuentas, function(x) { apply(datosR, 2, 
-                                                  function (y) { length(which(y <= x)) }) }))
-    numeros = rbind(numeros, nrow(datosR)-numeros[5,], nrow(datosR), 
-                    round(colSums(datos)/10^6, 1))
-    resumen[[i]] = data.frame(c(0, "<=1", "<=2", "<=5", "<=10", ">10", "total", "depth"),
-                              numeros)
+    resumen[[i]] = data.frame(c(paste("CPM >", cuentas), "depth"), mypersample, "total" = myglobal)
     colnames(resumen[[i]])[1] = names(resumen)[i]
                               
   }  
@@ -130,11 +156,9 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL)  {
 #***************************************************************************#
 
 
-
-
 ## PLOT: Mean length for detected genes Plot according to BIOTYPES
 
-countsbio.plot <- function (dat, toplot = "global", samples = NULL, plottype = c("barplot", "boxplot"),...) {
+countsbio.plot <- function (dat, samples = c(1,2), toplot = "global", plottype = c("barplot", "boxplot"),...) {
 
   # dat: Data coming from countsbio.dat function
   # samples: Samples to be plotted. If NULL, all samples are plotted.
@@ -150,40 +174,31 @@ countsbio.plot <- function (dat, toplot = "global", samples = NULL, plottype = c
     if (!exists("ylab")) ylab = ""
     
     datos = dat$summary[[toplot]]
+    mytotal = as.numeric(datos[,"total"])
     datos = as.matrix(datos[,samples])
-    rownames(datos) = dat$summary[[toplot]][,1]
+    rownames(datos) = as.character(dat$summary[[toplot]][,1])
     
     
     par(mar = c(6,4,4,2))
-        
-    barplot(as.numeric(datos["total",]), las = 2,
-            cex.axis = 0.8, border = NA, ylab = "", main = "", ...)
-    barplot(as.numeric(datos["<=10",]), ylab = "",  las = 2,
-            cex.axis = 0.8, border = NA, add = TRUE,
-            main = "", col = miscolores[1], ...)
-    barplot(as.numeric(datos["<=5",]), ylab = "",  las = 2,
-            cex.axis = 0.8, border = NA, add = TRUE,
-            main = "", col = miscolores[2], ...)
-    barplot(as.numeric(datos["<=2",]), ylab = "",  las = 2,
-            cex.axis = 0.8, border = NA, add = TRUE,
-            main = "", col = miscolores[3], ...)
-    barplot(as.numeric(datos["<=1",]), ylab = "",  las = 2,
-            cex.axis = 0.8, border = NA, add = TRUE,
-            main = "", col = miscolores[4], ...)
-    bp = barplot(as.numeric(datos["0",]), ylab = ylab,
-                 names.arg = colnames(datos), las = 2, cex.names = 0.8,
-                 cex.axis = 0.8, border = NA, add = TRUE,
-                 main = paste(toupper(toplot), " (", datos["total",1], ")", sep = ""),
-                 col = miscolores[6], ...)
-    if (length(samples) <= 20) {
-      mtext(side = 3, text = datos["depth",], adj = 0.5, at = bp, cex = 0.7)
+    
+    barplot(as.numeric(datos[1,]), col = miscolores[1], las = 2, main = "", ylab = "", density = 70,
+            ylim = c(0,100), cex.axis = 0.8, names.arg = "",...)  
+    for (i in 2:(length(mytotal)-2)) {
+      barplot(as.numeric(datos[i,]), col = miscolores[i], las = 2, main = "", ylab = "", add = TRUE, 
+              density = 70, ylim = c(0,100), cex.axis = 0.8, names.arg = "",...)    
+    }
+    bp = barplot(as.numeric(datos[(length(mytotal)-1),]), col = miscolores[(length(mytotal)-1)], las = 2, 
+                 main = paste(toupper(toplot), " (", mytotal[length(mytotal)], ")", sep = ""), 
+                 ylab = "Sensitivity (%)", add = TRUE, names.arg = colnames(datos), cex.axis = 0.8,
+                 density = 70, ylim = c(0,100), cex.names = 0.8,...) 
+    for (j in 1:(length(mytotal)-1)) abline(h = mytotal[j], col = miscolores[j], lwd = 2)
+    if (length(samples) <= 10) {
+      mtext(side = 3, text = datos["depth",], adj = 0.5, at = bp, cex = 0.8)
     } else {
       mtext(side = 3, text = datos["depth",], at = bp, cex = 0.7, las = 2)
-    }
-    legend(x = length(samples)/3, y = datos["total",1]*0.99, c(rownames(datos)[1:5],"All"), 
-           fill = c(miscolores[c(6,4:1)],"grey"), title = "#Features with expression value:",
-           bg = "white", ncol = 3, cex = 0.8)
-    
+    }    
+    legend("top", rownames(datos)[-length(mytotal)], fill = miscolores, density = 70, bty = "n", ncol = 3)
+      
     par(mar = c(5, 4, 4, 4) + 0.1) 
   }
   

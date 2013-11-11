@@ -1,7 +1,7 @@
 noiseq <-
 function (input, k = 0.5, norm = c("rpkm","uqua","tmm","n"),
           replicates = c("technical","biological","no"),
-          factor=NULL, conditions = NULL, pnr = 0.2, nss = 5, v = 0.02, lc = 1)
+          factor=NULL, conditions = NULL, pnr = 0.2, nss = 5, v = 0.02, lc = 0)
 
 # input: Object containing gene counts and as many columns as samples.
 
@@ -28,7 +28,7 @@ function (input, k = 0.5, norm = c("rpkm","uqua","tmm","n"),
 #         [(pnr-v)*sum(counts), (pnr+v)*sum(counts)]
 
 # lc:     Length correction in done by dividing expression by length^lc.
-#         By default, lc = 1. 
+#         By default, lc = 0. 
 
 {
   

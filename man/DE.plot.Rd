@@ -65,7 +65,7 @@ data(noiseq)
 
 ## Third, plot the expression values for all genes and highlighting the differentially expressed genes
 DE.plot(mynoiseq, q = 0.8, graphic = "expr", log.scale = TRUE)
-DE.plot(mynoiseq, q = 0.8, graphic = "MD", ylim = c(0,50))
+DE.plot(mynoiseq, q = 0.8, graphic = "MD")
 DE.plot(mynoiseq, chromosomes = c(1,2), log.scale = TRUE,join = FALSE, q = 0.8, graphic = "chrom")
 DE.plot(mynoiseq, chromosomes = NULL, q = 0.8, graphic = "distr")
 }

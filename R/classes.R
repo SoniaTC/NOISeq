@@ -1,5 +1,3 @@
-require(methods)
-
 setClass("Biodetection", representation(dat="list"))
 setClass("CD", representation(dat="list"))
 setClass("CountsBio", representation(dat="list"))
@@ -14,8 +12,9 @@ setMethod("explo.plot", "Biodetection", function(object, samples = c(1,2), ...)
 
 setMethod("explo.plot", "CD", function(object, samples = NULL, ...) cd.plot(object@dat, samples = samples, ...))
 
-setMethod("explo.plot", "CountsBio", function(object, toplot = 1, samples = NULL, plottype = c("barplot", "boxplot"), ...)
-          countsbio.plot(object@dat, toplot = toplot, samples = samples, plottype = plottype, ...))
+
+setMethod("explo.plot", "CountsBio", function(object, samples = c(1,2), toplot = "global", plottype = c("barplot", "boxplot"),...)
+          countsbio.plot(object@dat, samples, toplot, plottype, ...))
 
 setMethod("explo.plot", "GCbias", function(object, samples = NULL, toplot = "global", ...)
           GC.plot(object@dat, samples = samples, toplot = toplot, ...))
@@ -24,8 +23,8 @@ setMethod("explo.plot", "lengthbias", function(object, samples = NULL, toplot = 
           length.plot(object@dat, samples = samples, toplot = toplot, ...))
 
 setMethod("explo.plot", "Saturation",
-          function(object, toplot = 1, samples = NULL, yleftlim = NULL, yrightlim = NULL, ...)
-          saturation.plot(object@dat, toplot = toplot, samples = samples, yleftlim = yleftlim, yrightlim = yrightlim, ...))
+          function(object, samples = NULL, toplot = 1, yleftlim = NULL, yrightlim = NULL, ...)
+          saturation.plot(object@dat, samples = samples, toplot = toplot, yleftlim = yleftlim, yrightlim = yrightlim, ...))
 
 
 # Show methods for exploration objects
@@ -78,8 +77,11 @@ setMethod("show","lengthbias",
 setMethod("show","Saturation",
           function(object) {
             x <- dat2save(object)
-            cat("\n Number of detected features at each sequencing depth: \n============\n")  
-            print(x[[1]])
+            cat("\n Number of detected features at each sequencing depth: \n============\n") 
+            for (i in 1:length(x)) {
+              print(names(x)[i])
+              print(x[[i]])
+            }            
           })
 
 

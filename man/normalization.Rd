@@ -12,9 +12,9 @@ Upper Quartile (Bullard et al., 2010) and TMM (Trimmed Mean of M) (Robinson and 
 These normalization functions are used within the \code{noiseq} or \code{noiseqbio} functions but may be also used by themselves to normalize a dataset.
 }
 \usage{
-uqua(datos, long = 1000, lc = 1, k = 0)
+uqua(datos, long = 1000, lc = 0, k = 0)
 rpkm(datos, long = 1000, lc = 1, k = 0)
-tmm(datos, long = 1000, lc = 1, k = 0, refColumn = 1, logratioTrim = 0.3, sumTrim = 0.05, doWeighting = TRUE, Acutoff = -1e+10)
+tmm(datos, long = 1000, lc = 0, k = 0, refColumn = 1, logratioTrim = 0.3, sumTrim = 0.05, doWeighting = TRUE, Acutoff = -1e+10)
 }
 
 \arguments{
@@ -22,11 +22,11 @@ tmm(datos, long = 1000, lc = 1, k = 0, refColumn = 1, logratioTrim = 0.3, sumTri
 Matrix containing the read counts for each sample.
 }
   \item{long}{
-Numeric vector containing the length of the features. If long == 1000, no length correction is applied.
+Numeric vector containing the length of the features. If long == 1000, no length correction is applied (no matter the value of parameter lc).
 }
   \item{lc}{
 Correction factor for length normalization. This correction is done by dividing the counts 
-vector by length^lc. By default, lc = 1.
+vector by (length/1000)^lc. If lc = 0, no length correction is applied. By default, lc = 1 for RPKM and lc = 0 for the other methods.
 }
   \item{k}{
 Counts equal to 0 are changed to k in order to avoid indeterminations when applying logarithms, for instance. By default, k = 0.5
@@ -69,7 +69,7 @@ myrpkm = rpkm(datasim, long = lengthsim, lc = 1, k = 0)
 myuqua = uqua(datasim, long = lengthsim, lc = 0.5, k = 1)
 
 ## TMM normalization with no length correction
-mytmm = tmm(datasim, long = 1000, lc = 1, k = 0)
+mytmm = tmm(datasim, long = 1000, lc = 0, k = 0)
 
 }
 
