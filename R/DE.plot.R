@@ -80,7 +80,8 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom","distr"),
   ## MANHATTAN PLOT
   if (graphic == "chrom") {
     
-    mydata <- cbind(output@results[[1]][,c("Chrom","GeneStart","GeneEnd")],output@results[[1]][,1:2])
+    mydata <- data.frame(as.character(output@results[[1]][,"Chrom"]),
+                         output@results[[1]][,c("GeneStart","GeneEnd")],output@results[[1]][,1:2])
     mydata <- na.omit(mydata)
     
     colnames(mydata) <- c("chr", "start", "end", colnames(mydata)[-c(1:3)])

@@ -147,7 +147,7 @@ addData <- function(data, length = NULL, biotype = NULL, chromosome = NULL, fact
     Chromosome <- GeneStart <- GeneEnd <- rep(NA,length(rowNames))
     names(Chromosome) <- names(GeneStart) <- names(GeneEnd) <- rowNames
     
-    Chromosome[rowNames] <- chromosome[rowNames,1]
+    Chromosome[rowNames] <- as.character(chromosome[rowNames,1])
     GeneStart[rowNames] <- as.numeric(as.character(chromosome[rowNames,2]))
     GeneEnd[rowNames] <- as.numeric(as.character(chromosome[rowNames,3]))
         
