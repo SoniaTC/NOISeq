@@ -53,14 +53,15 @@ cd.dat <- function (input, norm = FALSE, refColumn = 1) {
   
   #### Diagnostic test
     
-  MsinRef = data2plot[,-match(refColumn, colnames(data2plot))]
+  MsinRef = as.matrix(data2plot[,-match(refColumn, colnames(data2plot))])
+  colnames(MsinRef) = colnames(data2plot)[-match(refColumn, colnames(data2plot))]
   alpha = 0.05
   alpha = alpha/ncol(MsinRef)
   nperm = 10^3
     
   bootmed = sapply(1:nperm, function(k) {
     permut = sample(1:nrow(MsinRef), replace = TRUE, nrow(MsinRef))
-    permut = MsinRef[permut,]
+    permut = as.matrix(MsinRef[permut,])
     permut = apply(permut, 2, median)    
     permut
   })

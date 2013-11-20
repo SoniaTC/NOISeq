@@ -26,7 +26,7 @@ version 2.2.0 (2013-10-14)
  - Plot to evaluate RNA composition bias has been changed.
  - Some bugs have been fixed.
 
-version 2.3.5 (2013-11-4)
+version 2.3.4 (2013-11-4)
  - The "CountsBio" barplot has been modified.
  - User's guide and Reference manual have been improved.
  - A bug in "Saturation" plot has been fixed.
@@ -35,4 +35,7 @@ version 2.3.5 (2013-11-4)
  - MD plot is now available also for NOISeqBIO results and D is plotted in log-scale.
  - A bug in "explo.plot" function has been fixed.
 
+version 2.3.6 (2013-11-20)
+ - A bug in "RNA composition" plot was fixed.
+ 
 
