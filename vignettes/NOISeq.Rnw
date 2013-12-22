@@ -27,7 +27,7 @@
 
 
 \title{\noiseq: Differential Expression in \textsf{RNA-seq}}
-\author{Sonia Tarazona (\texttt{starazona@cipf.es})\\Pedro Furió-Tarí (\texttt{pfurio@cipf.es})\\Alberto Ferrer (\texttt{aferrer@eio.upv.es})\\Ana Conesa (\texttt{aconesa@cipf.es})}
+\author{Sonia Tarazona (\texttt{starazona@cipf.es})\\Pedro Furi\'{o}-Tar\'{i} (\texttt{pfurio@cipf.es})\\Alberto Ferrer (\texttt{aferrer@eio.upv.es})\\Ana Conesa (\texttt{aconesa@cipf.es})}
 % Please increment date when working on this document, so that
 % date shows genuine change date, not merely date of compile.
 \date{20 November 2013 \\(Version 2.4.0)}
@@ -967,13 +967,13 @@ J.C. Marioni, C.E. Mason, S.M. Mane, M. Stephens, and Y. Gilad.
 \newblock RNA-seq: an
 assessment of technical reproducibility and comparison with gene
 expression arrays.
-\newblock \emph{Genome Research}, 18: 1509–1517, 2008.
+\newblock \emph{Genome Research}, 18: 1509 - 517, 2008.
 
 
 \bibitem{Mortazavi2008} 
 A. Mortazavi, B.A. Williams, K. McCue, L. Schaeffer, and
 B. Wold.  \newblock {Mapping and quantifying mammalian transcriptomes by RNA-Seq}.
-  \newblock \emph{Nature Methods}, 5: 621–628, 2008.
+  \newblock \emph{Nature Methods}, 5: 621 - 628, 2008.
 
 
 \bibitem{Bullard2010}
