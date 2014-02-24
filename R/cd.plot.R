@@ -62,9 +62,11 @@ cd.dat <- function (input, norm = FALSE, refColumn = 1) {
   bootmed = sapply(1:nperm, function(k) {
     permut = sample(1:nrow(MsinRef), replace = TRUE, nrow(MsinRef))
     permut = as.matrix(MsinRef[permut,])
-    permut = apply(permut, 2, median)    
+    permut = apply(permut, 2, median)   
     permut
   })
+  
+  if (is.null(dim(bootmed))) bootmed = t(as.matrix(bootmed))
   
   bootmed = t(apply(bootmed, 1, quantile, probs = round(c(alpha/2, 1 - alpha/2), 4)))
   diagno = apply(bootmed, 1, 
@@ -116,7 +118,7 @@ cd.plot <- function (dat, samples = NULL,...) {
   
   if(length(samples) > 12) stop("Please select 12 samples or less to be plotted (excluding reference).")
       
-  dat = dat[,samples]
+  dat = as.matrix(dat[,samples])
   
   dat.dens = apply(dat, 2, density, adjust = 1.5)
   limY = c(0,max(sapply(dat.dens, function (x) max(x$y, na.rm = TRUE))))
@@ -125,10 +127,12 @@ cd.plot <- function (dat, samples = NULL,...) {
        type = "l", col = miscolores[1], main = paste("Reference sample:", refColumn), ...)
   abline(v = median(dat[,1], na.rm = TRUE), col = miscolores[1], lty = 2)
   
-  for (i in 2:length(samples)) {
-    lines(dat.dens[[i]], col = miscolores[i], lwd = 2)
-    abline(v = median(dat[,i], na.rm = TRUE), col = miscolores[i], lty = i+1)
-  }
+  if (length(samples) > 1) {
+    for (i in 2:length(samples)) {
+      lines(dat.dens[[i]], col = miscolores[i], lwd = 2)
+      abline(v = median(dat[,i], na.rm = TRUE), col = miscolores[i], lty = i+1)
+    }
+  }  
 
   legend("topleft", legend = samples, text.col = miscolores[1:length(samples)], bty = "n",
          lty = 1, lwd = 2, col = miscolores[1:length(samples)])

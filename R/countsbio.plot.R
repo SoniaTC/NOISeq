@@ -1,13 +1,11 @@
 ##Counts for detected genes Plot according to BIOTYPES (boxplots)
 
-countsbio.dat <- function (input, biotypes = NULL, factor = NULL)  {
+countsbio.dat <- function (input, biotypes = NULL, factor = NULL, norm = FALSE)  {
 
   # input: input object
   # biotypes: List containing groups of biotypes to be studied
   # factor: If not NULL, it should contain the conditions to be studied and
   #         calculation will be done based on the mean of replicates of each condition.
-  # quartiles: Return a summary matrix with quantile information for each biotype.
-
 
 
   if (inherits(input,"eSet") == FALSE)
@@ -50,14 +48,27 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL)  {
     niveles = levels(mifactor)
     print("Counts per million distributions are to be computed for:")
     print(niveles)
-    datos = sapply(niveles, 
-                   function (k) { 
-                     10^6 * rowMeans(t(t(datos[,grep(k, mifactor)])/colSums(as.matrix(datos[,grep(k, mifactor)]))))
+    
+    if (norm) {
+      datos = sapply(niveles, 
+                     function (k) { 
+                       rowMeans(as.matrix(datos[,grep(k, mifactor)]))
                      })
-    datos0 = sapply(niveles, 
-                    function (k) { 
-                      10^6 * rowMeans(t(t(datos0[,grep(k, mifactor)])/colSums(as.matrix(datos0[,grep(k, mifactor)]))))
-                    })
+      datos0 = sapply(niveles, 
+                      function (k) { 
+                        rowMeans(as.matrix(datos0[,grep(k, mifactor)]))
+                      })
+      
+    } else {
+      datos = sapply(niveles, 
+                     function (k) { 
+                       10^6 * rowMeans(t(t(datos[,grep(k, mifactor)])/colSums(as.matrix(datos[,grep(k, mifactor)]))))
+                     })
+      datos0 = sapply(niveles, 
+                      function (k) { 
+                        10^6 * rowMeans(t(t(datos0[,grep(k, mifactor)])/colSums(as.matrix(datos0[,grep(k, mifactor)]))))
+                      })      
+    }
     colnames(datos) = colnames(datos0) = niveles
     depth = sapply(niveles, function (k) paste(range(depth[grep(k, mifactor)]), collapse = "-"))
   }
@@ -100,7 +111,12 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL)  {
   cuentas = c(0,1,2,5,10)
   
   if (is.null(factor)) {
-    datosCPM = 10^6 * t(t(datos)/colSums(as.matrix(datos)))
+    if (norm) {
+      datosCPM = datos
+    } else {
+      datosCPM = 10^6 * t(t(datos)/colSums(as.matrix(datos)))
+    }
+    
   } else { datosCPM = datos }
       
   for (i in 1:length(resumen)) { 

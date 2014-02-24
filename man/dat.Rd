@@ -30,7 +30,7 @@ If factor = NULL (default), the calculations are done for each sample independen
 Samples within the same condition are summed up ("biodetection") or averaged and normalized by sequencing depth ("countsbio", "GCbias" and "lengthbias").
 }
   \item{norm}{
-To indicate if provided data are already normalized (TRUE) or they are raw data (FALSE), which is the default. This parameter is only used by type "cd".
+To indicate if provided data are already normalized (TRUE) or they are raw data (FALSE), which is the default. This parameter is used by types "cd", "lengthbias", "GCbias" and "countsbio".
 }
   \item{refColumn}{
 Column number in input data that is taken as the reference sample to compute M values. This parameter is only used by type "cd".

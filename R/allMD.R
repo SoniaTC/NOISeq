@@ -367,6 +367,9 @@ allMDbio = function (input, factor, conditions, k = 0.5, norm = "rpkm", lc = 1,
         comparison <- paste(levels(pData(input)[,i])[1], levels(pData(input)[,i])[2], sep=" - ")
         
         condition_lev = TRUE
+        
+        if (!((ncol(datos1) > 1) && (ncol(datos2) > 1))) 
+          stop("Error. NOISeqBIO needs at least 2 biological replicates per condition.\n")
       }
       
       else {

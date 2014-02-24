@@ -52,7 +52,7 @@ filtered.data = function(dataset, factor, norm = TRUE, depth = NULL, method = 1,
     } 
     
     if (method == 2) {
-      if (ncol(datos) == 1) stop("ERROR: At least 2 replicates per condition are requiered to apply this method.")
+      if (ncol(datos) == 1) stop("ERROR: At least 2 replicates per condition are required to apply this method.")
       mytest = apply(datos, 1, 
                      function (x) { 
                        suppressWarnings(wilcox.test(x, alternative = "greater", conf.int=FALSE, mu = 0))$"p.value" })

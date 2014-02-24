@@ -3,7 +3,7 @@
 
 ## Data for GC plot 
 
-GC.dat <- function (input, factor = NULL)  {
+GC.dat <- function (input, factor = NULL, norm = FALSE)  {
   
   # This plot shows the mean expression for each GC content bin, globally or for each biotype (if available).
   
@@ -39,10 +39,18 @@ GC.dat <- function (input, factor = NULL)  {
     niveles = levels(mifactor)
     print("GC content bias detection is to be computed for:")
     print(niveles)
-    datos = sapply(niveles, 
-                   function (k) {
-                     rowMeans(t(10^6*t(datos[,grep(k, mifactor)])/colSums(as.matrix(datos[,grep(k, mifactor)]))))
-                   })
+    
+    if (norm) {
+      datos = sapply(niveles, 
+                     function (k) {
+                       rowMeans(as.matrix(datos[,grep(k, mifactor)]))
+                     })    
+    } else {
+      datos = sapply(niveles, 
+                     function (k) {
+                       rowMeans(t(10^6*t(datos[,grep(k, mifactor)])/colSums(as.matrix(datos[,grep(k, mifactor)]))))                     
+                     })    
+    } 
     colnames(datos) = niveles
   }
   

@@ -7,6 +7,7 @@ tmm = function (datos, long = 1000, lc = 0, k = 0, refColumn = 1,
   # lc: Length correction. Expression is divided by long^lc. lc can be any real number.
   
   L <- (long/1000)^lc
+  datos = datos/L
   
   total <- colSums(as.matrix(datos))
   
@@ -20,7 +21,7 @@ tmm = function (datos, long = 1000, lc = 0, k = 0, refColumn = 1,
           
     fk = fk * total
     
-    datos.norm <- (t(t(datos0)/fk)*10^6)/L
+    datos.norm <- t(t(datos0)/fk)*10^6
     
   } else {
     
@@ -56,6 +57,7 @@ uqua <- function (datos, long = 1000, lc = 0, k = 0) {
 # lc: Length correction. Expression is divided by long^lc. lc can be any real number.
 
   L <- (long/1000)^lc
+  datos = datos/L
 
   datos0 <- sinceros(datos, k)
 
@@ -73,7 +75,7 @@ uqua <- function (datos, long = 1000, lc = 0, k = 0) {
     q3 <- apply(datitos, 2, quantile, probs = 0.75)
     d <- q3*supertot/sum(q3)
 
-    datos.norm <- (t(t(datos0)/d)*10^6)/L
+    datos.norm <- t(t(datos0)/d)*10^6
 
   } else {
 

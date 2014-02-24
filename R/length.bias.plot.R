@@ -3,7 +3,7 @@
 
 ## Data for gene length plot
 
-length.dat <- function (input, factor = NULL)  {
+length.dat <- function (input, factor = NULL, norm = FALSE)  {
   
   # This plot shows the mean expression for each length bin, globally or for each biotype (if available).
   
@@ -35,14 +35,22 @@ length.dat <- function (input, factor = NULL)  {
     print(colnames(datos))
     
   } else {  # per condition
-    mifactor = pData(input)[,factor]
+    mifactor = as.factor(pData(input)[,factor])
     niveles = levels(mifactor)
     print("Length bias detection information is to be computed for:")
     print(niveles)
-    datos = sapply(niveles, 
-                   function (k) {
-                     rowMeans(t(10^6*t(datos[,grep(k, mifactor)])/colSums(as.matrix(datos[,grep(k, mifactor)]))))
-                   })
+    
+    if (norm) {
+      datos = sapply(niveles, 
+                     function (k) {
+                       rowMeans(as.matrix(datos[,grep(k, mifactor)]))
+                     })    
+    } else {
+      datos = sapply(niveles, 
+                     function (k) {
+                       rowMeans(t(10^6*t(datos[,grep(k, mifactor)])/colSums(as.matrix(datos[,grep(k, mifactor)]))))                     
+                     })    
+    }    
     colnames(datos) = niveles
   }
   
@@ -102,6 +110,7 @@ length.dat <- function (input, factor = NULL)  {
       miclasi = cut(long, breaks = misbins, labels = FALSE)
       misbins = sapply(1:numbins, function (i) mean(misbins[i:(i+1)]))
       miclasi = misbins[miclasi]
+      
       longexpr[[i]] = aggregate(datos, by = list("lengthbin" = miclasi), mean, trim = 0.025)      
       
     } else {  # PER BIOTYPE

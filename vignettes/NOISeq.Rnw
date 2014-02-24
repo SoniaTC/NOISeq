@@ -30,7 +30,7 @@
 \author{Sonia Tarazona (\texttt{starazona@cipf.es})\\Pedro Furi\'{o}-Tar\'{i} (\texttt{pfurio@cipf.es})\\Alberto Ferrer (\texttt{aferrer@eio.upv.es})\\Ana Conesa (\texttt{aconesa@cipf.es})}
 % Please increment date when working on this document, so that
 % date shows genuine change date, not merely date of compile.
-\date{20 November 2013 \\(Version 2.4.0)}
+\date{24 February 2014 \\(Version 2.6.0)}
 \maketitle
 
 

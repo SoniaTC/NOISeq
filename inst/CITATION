@@ -5,7 +5,7 @@ citEntry(
 	journal="Genome research",
 	volume=21,
 	number=12,
-	pages=2213-2223,
+	pages=2213--2223,
 	year=2011,
 	textVersion = "Tarazona, S., Garcia-Alcalde, F., Dopazo, J., Ferrer, A., & Conesa, A. (2011). Differential expression in RNA-seq: a matter of depth. Genome research, 21(12), 2213-2223."
 )

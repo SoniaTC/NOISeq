@@ -20,19 +20,19 @@ dat = function (input, type = c("biodetection","cd","countsbio","GCbias","length
   
   if (type == "countsbio") {
     
-    output =  new("CountsBio", dat = countsbio.dat(input, factor = factor))
+    output =  new("CountsBio", dat = countsbio.dat(input, factor = factor, norm = norm))
   }
 
 
   if (type == "GCbias") {
     
-    output =  new("GCbias", dat = GC.dat(input, factor = factor))
+    output =  new("GCbias", dat = GC.dat(input, factor = factor, norm = norm))
   }
 
   
   if (type == "lengthbias") {
     
-    output =  new("lengthbias", dat = length.dat(input, factor = factor))
+    output =  new("lengthbias", dat = length.dat(input, factor = factor, norm = norm))
   }
   
   if (type == "saturation") {
