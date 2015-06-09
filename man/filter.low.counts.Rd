@@ -8,7 +8,7 @@ Methods to filter out low count features
 Function to filter out the low count features according to three different methods.
 }
 \usage{
-filtered.data(dataset, factor, norm = TRUE, depth = NULL, method = 1, cv.cutoff = 100, cpm = 1)
+filtered.data(dataset, factor, norm = TRUE, depth = NULL, method = 1, cv.cutoff = 100, cpm = 1, p.adj = "fdr")
 }
 
 \arguments{
@@ -39,6 +39,10 @@ Cutoff for the coefficient of variation per condition to be used in method 1 (in
 }
 \item{cpm}{
 Cutoff for the counts per million value to be used in methods 1 and 3.
+}
+\item{p.adj}{
+Method for the multiple testing correction. The same methods as in the p.adjust function in stats package can be chosen: "holm", "hochberg", "hommel", "bonferroni", "BH", "BY",
+"fdr", "none". 
 }
 }
 

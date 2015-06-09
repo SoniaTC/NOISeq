@@ -1,3 +1,11 @@
+version 2.12.0 (2015-06-09)
+ - New "biotype detection" plot for comparing two samples or conditions. Also a proportion test is performed to compare the abundance of a given biotype between two samples/condtions.
+ - New functions to generate Principal Component Analysis plots from either NOISeq object or expression matrix.
+ - New ARSyNseq function to correct batch effect or reduce noise from unknown sources when batch information is not available.
+ - Quality Control PDF report now includes the new "biotype detection" plot and PCA.
+ - The User's Guide has been improved and extended to include the new functionalities.
+ - Bugs were fixed.
+
 version 2.6.0 (2014-02-24)
  - Fixed bug in dat() function. Now data with two samples are allowed.
  - dat() function was also modified so parameter "norm" is accepted for "countsbio", "lengthbias" and "GCbias" plots.

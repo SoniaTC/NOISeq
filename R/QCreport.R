@@ -5,6 +5,7 @@
 
 ## By Sonia Tarazona
 ## 25-June-2013
+## Modified: 30-March-2015
 
 
 ### Generating data for QC report
@@ -16,29 +17,33 @@ data2report = function(input, factor = NULL, norm = FALSE) {
   ## Biotype detection
   if (!is.null(featureData(input)$Biotype)) {  # BIOTYPES
     mybiotdet = biodetection.dat(input, factor = factor, k = 0); biot.avail = TRUE
-    mycountsbio1 = countsbio.dat(input, factor = factor)
+    mycountsbio1 = countsbio.dat(input, factor = factor, norm = norm)
   } else {  # NO biotypes
     mybiotdet = NULL; mycountsbio1 = NULL; biot.avail = FALSE
   }
   
   ## Sequencing depth & Expression quantification
   mysat = saturation.dat(input, k = 0, ndepth = 6)
-  mycountsbio2 = countsbio.dat(input, factor = factor)
+  mycountsbio2 = countsbio.dat(input, factor = factor, norm = norm)
   
   ## Bias detection
   if (!is.null(featureData(input)$Length)) {  # LENGTH
-    mylength = length.dat(input, factor = factor); length.avail = TRUE
+    mylength = length.dat(input, factor = factor, norm = norm); length.avail = TRUE
   } else { mylength = NULL; length.avail = FALSE }
   
   if (!is.null(featureData(input)$GC)) {  # GC
-    myGC = GC.dat(input, factor = factor); GC.avail = TRUE
+    myGC = GC.dat(input, factor = factor, norm = norm); GC.avail = TRUE
   } else { myGC = NULL; GC.avail = FALSE }
   
   myCD = cd.dat(input, norm = norm, refColumn = 1)
   
   
+  ## PCA
+  myPCA = PCA.dat(input, norm = norm, logtransf = FALSE)
+  
+  
   list("data" = list("biodet" = mybiotdet, "countsbiot" = mycountsbio1, "saturation" = mysat, 
-                     "countsampl" = mycountsbio2, "length" = mylength, "GC" = myGC, "countdist" = myCD),
+                     "countsampl" = mycountsbio2, "length" = mylength, "GC" = myGC, "countdist" = myCD, "PCA" = myPCA),
        "parameters" = list("biotypes" = biot.avail, "length" = length.avail, "GC" = GC.avail))
   
 }
@@ -55,12 +60,12 @@ data2report = function(input, factor = NULL, norm = FALSE) {
 
 
 
-QCreport = function (input, file = NULL, samples = NULL, factor = NULL) {
+QCreport = function (input, file = NULL, samples = NULL, factor = NULL, norm = FALSE) {
 
   if (is.null(file))
 	file <- paste("QCreport", format(Sys.time(), "_%Y%b%d_%H_%M_%S"), ".pdf", sep = "")  
 
-  QCinfo = data2report(input = input, factor = factor)
+  QCinfo = data2report(input = input, factor = factor, norm = norm)
   
   samples2 = colnames(QCinfo$data$countdist$data2plot)
     
@@ -128,14 +133,16 @@ QCreport = function (input, file = NULL, samples = NULL, factor = NULL) {
   bajo = 0.5
   text(lugares[1], empiezo, "Biotype detection", adj = 0, font = 2, cex = 1)
   if (QCinfo$parameters$biotypes) {
-    text(lugares[2], empiezo, "Number of genes per biotype in the genome, and detected (counts > 0) in the sample/condition.", 
+    text(lugares[2], empiezo, "Biotype abundance in the genome with %genes detected (counts > 0) in the sample/condition.", 
+         adj = 0, font = 1, cex = 1)
+    text(lugares[2], empiezo-bajo/2, "Biotype abundance within the sample/condition.", 
          adj = 0, font = 1, cex = 1)
   } else {
     text(lugares[2], empiezo, "Plot not available. Biotypes information was not provided.", 
          adj = 0, font = 1, cex = 1)
   }  
       
-  empiezo = empiezo-bajo
+  empiezo = empiezo-bajo-0.3
   text(lugares[1], empiezo, "Biotype expression", adj = 0, font = 2, cex = 1)
   if (QCinfo$parameters$biotypes) {
     text(lugares[2], empiezo, "Distribution of gene counts per million per biotype in sample/condition (only genes with counts > 0).", 
@@ -192,14 +199,14 @@ QCreport = function (input, file = NULL, samples = NULL, factor = NULL) {
     ## SUBTITLE
     par(mar = c(0,0,0,0))
     plot(1:10, 1:10, type = "n", axes = FALSE, xlab = "", ylab = "")
-    text(5,6, "Biotype detection per condition", adj = 0.5, font = 2, cex = 2, col = "dodgerblue4")
+    text(5,6, "Biotype detection", adj = 0.5, font = 2, cex = 2, col = "dodgerblue4")
     
     ## BIODETECTION PLOTS
-    biodetection.plot(QCinfo$data$biodet, samples = samples)
+    biodetection.plot(QCinfo$data$biodet, samples = samples, plottype = "comparison", toreport = TRUE)
     countsbio.plot(QCinfo$data$countsbiot, toplot = "global", samples = samples[1], plottype = "boxplot",
-                   ylim = range(log2(1+QCinfo$data$countsbiot$result)))  
+                   ylim = range(log2(1+QCinfo$data$countsbiot$result)), toreport = TRUE)  
     countsbio.plot(QCinfo$data$countsbiot, toplot = "global", samples = samples[2], plottype = "boxplot",
-                   ylim = range(log2(1+QCinfo$data$countsbiot$result)))  
+                   ylim = range(log2(1+QCinfo$data$countsbiot$result)), toreport = TRUE)  
   }
   
   
@@ -229,7 +236,8 @@ QCreport = function (input, file = NULL, samples = NULL, factor = NULL) {
   } 
   
   par(mar = c(0,0,0,0))
-  countsbio.plot(QCinfo$data$countsampl, toplot = "global", samples = samples, plottype = "boxplot")
+  countsbio.plot(QCinfo$data$countsampl, toplot = "global", samples = samples, plottype = "boxplot",
+                 toreport = TRUE)
   
   if (is.null(niveles)) {  # NO factor
     par(mar = c(0,0,0,0))
@@ -245,7 +253,8 @@ QCreport = function (input, file = NULL, samples = NULL, factor = NULL) {
     }  
   }  
   
-  countsbio.plot(QCinfo$data$countsampl, toplot = "global", samples = samples, plottype = "barplot")
+  countsbio.plot(QCinfo$data$countsampl, toplot = "global", samples = samples, plottype = "barplot",
+                 toreport = TRUE)
                  
   
   
@@ -614,8 +623,30 @@ QCreport = function (input, file = NULL, samples = NULL, factor = NULL) {
     }
     
     
-  }  
+  }
   
+  
+  # Last page (for PCA)
+  
+  # Page 4
+  layout(matrix(c(1,1,2,3,4,4), nrow = 3, ncol = 2, byrow = TRUE), heights = c(10,40,45))
+  
+  par(mar = c(0,0,0,0))
+  plot(1:10, 1:10, type = "n", axes = FALSE, xlab = "", ylab = "")
+  text(5,8, "Exploratory PCA", adj = 0.5, font = 4, cex = 1.5, col = "aquamarine4")
+  text(5,5, "Use this plot to see if samples are clustered according to the experimental design.", 
+       adj = 0.5, font = 1, cex = 1)
+  text(5,3, "Use ARSyNseq function to correct potential batch effects.", adj = 0.5, font = 1, cex = 1)
+  
+  if (is.null(factor)) factor = colnames(QCinfo$data$PCA$factors)[1]
+    
+  par(mar = c(5.1,4.1,4.1,2.1))
+  PCA.plot(QCinfo$data$PCA, samples = 1:2, factor = factor) 
+  
+  par(mar = c(5.1,4.1,4.1,2.1))
+  PCA.plot(QCinfo$data$PCA, samples = c(1,3), factor = factor) 
+
+  #*****#
   
   dev.off()
   

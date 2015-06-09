@@ -44,8 +44,8 @@ noiseqbio = function (input, k = 0.5, norm = c("rpkm","uqua","tmm","n"), nclust 
          Please, give the argument 'factor'.\n")
   
   if (min(table(input@phenoData@data[,factor])) < 2)
-    stop("ERROR: To run NOISeqBIO at least to replicates for each condition are needed.
-         Please, run NOISeq if there are not replicates enough in your experiment.\n")  
+    stop("ERROR: To run NOISeqBIO at least two replicates per condition are needed.
+         Please, run NOISeq if there are not enough replicates in your experiment.\n")  
   
   norm <- match.arg(norm)
   

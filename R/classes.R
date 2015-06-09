@@ -4,11 +4,13 @@ setClass("CountsBio", representation(dat="list"))
 setClass("GCbias", representation(dat="list"))
 setClass("lengthbias", representation(dat="list"))
 setClass("Saturation", representation(dat="list"))
+setClass("PCA", representation(dat="list"))
 
 setGeneric("explo.plot", function(object, ...) standardGeneric("explo.plot"))
 
-setMethod("explo.plot", "Biodetection", function(object, samples = c(1,2), ...) 
-  biodetection.plot(object@dat, samples = samples, ...))
+setMethod("explo.plot", "Biodetection", function(object, samples = c(1,2), plottype = c("persample", "comparison"), 
+                                                 toplot = "protein_coding", ...) 
+  biodetection.plot(object@dat, samples = samples, plottype = plottype, toplot = toplot, ...))
 
 setMethod("explo.plot", "CD", function(object, samples = NULL, ...) cd.plot(object@dat, samples = samples, ...))
 
@@ -25,6 +27,10 @@ setMethod("explo.plot", "lengthbias", function(object, samples = NULL, toplot = 
 setMethod("explo.plot", "Saturation",
           function(object, samples = NULL, toplot = 1, yleftlim = NULL, yrightlim = NULL, ...)
           saturation.plot(object@dat, samples = samples, toplot = toplot, yleftlim = yleftlim, yrightlim = yrightlim, ...))
+
+setMethod("explo.plot", "PCA", function(object, samples = 1:2, plottype = "scores", factor = NULL)
+  PCA.plot(object@dat, samples = samples, plottype = plottype, factor = factor))
+
 
 
 # Show methods for exploration objects
@@ -85,6 +91,18 @@ setMethod("show","Saturation",
           })
 
 
+setMethod("show","PCA",
+          function(object) {
+            x <- object$result$var.exp
+            x = round(x*100,4)
+            colnames(x) = c("%Var", "Cum %Var")
+            rownames(x) = paste("PC", 1:nrow(x))
+            cat("\n Percentage of total variance explained by each component: \n============\n") 
+            print(x)                        
+          })
+
+
+
 # Coercion methods for exploration objects
 
 setGeneric("dat2save", function(object)  standardGeneric("dat2save"))
@@ -119,6 +137,7 @@ setMethod("dat2save","Saturation", function(object) {
 })
 
 
+setMethod("dat2save","PCA", function(object) object@dat$result)
 
 
 ############################################################################

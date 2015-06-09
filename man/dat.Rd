@@ -8,8 +8,8 @@ Exploration of expression data.
 Take the expression data and the feature annotations to generate the results that will be used for the exploratory plots (\code{explo.plot}) or saved by the user to perform other analyses.
 }
 \usage{
-dat(input, type = c("biodetection","cd","countsbio","GCbias","lengthbias","saturation"), 
-                    k = 0, ndepth = 6, factor = NULL, norm = FALSE, refColumn = 1)
+dat(input, type = c("biodetection","cd","countsbio","GCbias","lengthbias","saturation","PCA"), 
+                    k = 0, ndepth = 6, factor = NULL, norm = FALSE, refColumn = 1, logtransf = FALSE)
 }
 
 \arguments{
@@ -35,6 +35,10 @@ To indicate if provided data are already normalized (TRUE) or they are raw data 
   \item{refColumn}{
 Column number in input data that is taken as the reference sample to compute M values. This parameter is only used by type "cd".
 }
+  \item{logtransf}{
+To indicate if the data are already log-transformed (TRUE) or not (FALSE). If data are not log-transformed, a log-transformation will be applied before computing the Principal Component Analysis.
+}
+
 }
 
 

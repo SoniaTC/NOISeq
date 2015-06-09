@@ -29,7 +29,7 @@ Correction factor for length normalization. This correction is done by dividing 
 vector by (length/1000)^lc. If lc = 0, no length correction is applied. By default, lc = 1 for RPKM and lc = 0 for the other methods.
 }
   \item{k}{
-Counts equal to 0 are changed to k in order to avoid indeterminations when applying logarithms, for instance. By default, k = 0.5
+Counts equal to 0 are changed to k in order to avoid indeterminations when applying logarithms, for instance. By default, k = 0.
 }
 \item{refColumn}{
 Column to use as reference (only needed for \code{tmm} function).

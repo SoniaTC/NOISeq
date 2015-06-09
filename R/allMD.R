@@ -39,7 +39,8 @@ allMD <- function (input, factor, conditions, k = 0.5, replicates, norm = "rpkm"
 
   for (i in colnames(pData(input))) {
     if (factor == i) {
-      condition_fac = TRUE
+      condition_fac = TRUE  
+      if (!is.factor(pData(input)[,i])) pData(input)[,i] = as.factor(pData(input)[,i])
       if (length(levels(pData(input)[,i])) == 2) {
 
         if (!is.null(assayData(input)$exprs)) {
@@ -274,10 +275,11 @@ allMD <- function (input, factor, conditions, k = 0.5, replicates, norm = "rpkm"
 
   } else {
 
-    if (norm == "n" & (n1+n1) == 2) {
+    if ((n1+n1) == 2) {
       datos1.norm <- sinceros(as.matrix(datos1)[concounts,], k = k)
-      datos2.norm <- sinceros(as.matrix(datos2)[concounts,], k = k)
-    }
+      datos2.norm <- sinceros(as.matrix(datos2)[concounts,], k = k)      
+    }  
+    
 
     resum1.norm <- rowMeans(as.matrix(datos1.norm))
     resum2.norm <- rowMeans(as.matrix(datos2.norm))
@@ -353,6 +355,7 @@ allMDbio = function (input, factor, conditions, k = 0.5, norm = "rpkm", lc = 1,
   for (i in colnames(pData(input))) {
     if (factor == i) {
       condition_fac = TRUE
+      if (!is.factor(pData(input)[,i])) pData(input)[,i] = as.factor(pData(input)[,i])
       if (length(levels(pData(input)[,i])) == 2) {
         
         if (!is.null(assayData(input)$exprs)) {

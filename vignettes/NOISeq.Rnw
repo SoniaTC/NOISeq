@@ -27,10 +27,11 @@
 
 
 \title{\noiseq: Differential Expression in \textsf{RNA-seq}}
-\author{Sonia Tarazona (\texttt{starazona@cipf.es})\\Pedro Furi\'{o}-Tar\'{i} (\texttt{pfurio@cipf.es})\\Alberto Ferrer (\texttt{aferrer@eio.upv.es})\\Ana Conesa (\texttt{aconesa@cipf.es})}
+\author{Sonia Tarazona (\texttt{starazona@cipf.es})\\Pedro Furi\'{o}-Tar\'{i} (\texttt{pfurio@cipf.es})\\
+Mar\'{i}a Jos\'{e} Nueda (\texttt{mj.nueda@ua.es})\\Alberto Ferrer (\texttt{aferrer@eio.upv.es})\\Ana Conesa (\texttt{aconesa@cipf.es})}
 % Please increment date when working on this document, so that
 % date shows genuine change date, not merely date of compile.
-\date{24 February 2014 \\(Version 2.6.0)}
+\date{4 June 2015 \\(Version 2.12.0)}
 \maketitle
 
 
@@ -44,23 +45,23 @@ options(digits=3, width=95)
 
 \section{Introduction}
 
-This document intends to guide you through to the use of the \R{} Bioconductor package \noiseq{},
+This document will guide you through to the use of the \R{} Bioconductor package \noiseq{},
 for analyzing count data coming from next generation sequencing technologies. 
-First, we describe the input data format. Then, we suggest you 
-to explore the data using \noiseq{} functionalities in order to learn more about saturation, 
-contamination or other biases in your data. Finally, we show how to compute differential 
-expression between two experimental conditions. The differential expression method \noiseq{} and some of the plots included in the package were used 
-in \cite{tarazona2011}. We also include in the package the new version of \noiseq{} for biological replicates, called \noiseqbio{}.
+\noiseq{} package consists of three modules: (1) Quality control of count data; (2) Normalization and low-count filtering; and (3) Differential expression analysis.
 
-\noiseq{} and \noiseqbio{} differ from existing methods in that they are data-adaptive and nonparametric. 
+First, we describe the input data format. Next, we illustrate the utilities to explore the quality of the count data: saturation, biases, 
+contamination, etc. and show the normalization, filtering and batch correction methods included in the package. Finally, we explain how to compute differential 
+expression between two experimental conditions. The differential expression method \noiseq{} and some of the plots included in the package were displayed in \cite{tarazona2011}.The new version of \noiseq{} for biological replicates (\noiseqbio{}) is also implemented in the package.
+
+The \noiseq{} and \noiseqbio{} methods are data-adaptive and nonparametric. 
 Therefore, no distributional assumptions need to be done for the data
-and differential expression analysis may be carried on for both raw counts or previously normalized datasets. 
+and differential expression analysis may be carried on for both raw counts or previously normalized or transformed datasets. 
 
 We will use the ``reduced'' Marioni's dataset \cite{marioni2008} as an example throughout this document. In Marioni's experiment, 
-human kidney and liver RNA-seq samples were sequenced. There are 5 technical replicates per tissue. 
+human kidney and liver RNA-seq samples were sequenced. There are 5 technical replicates per tissue, 
+and samples were sequenced in two different runs. 
 We selected chromosomes I to IV from the original data and removed genes with 0 counts in all samples and with no length information available. 
-Note that this reduced dataset is only used to decrease the computing time while testing the examples. We strongly recommend to use the whole set of features 
-(e.g. the whole genome) in real analysis.
+Note that this reduced dataset is only used to decrease the computing time while testing the examples. We strongly recommend to use the whole set of features (e.g. the whole genome) in real analysis.
 
 The example dataset can be obtained by typing:
 
@@ -75,16 +76,15 @@ data(Marioni)
 
 \section{Input data}
 
-\noiseq{} requires mainly two pieces of information that must be provided to the \code{readData} function: the expression data (\texttt{data}) 
-and the factors defining the experimental groups to be studied or compared (\texttt{factors}). However, in order to normalize the count data 
-or generate the exploratory plots included in the package for quality control, other additional annotations need to be provided such as the feature length, 
-the GC content, the biological classification of the features (e.g. Ensembl biotypes), or the chromosome and position of each feature.
+\noiseq{} requires two pieces of information to work that must be provided to the \code{readData} function: the expression data (\texttt{data}) 
+and the factors defining the experimental groups to be studied or compared (\texttt{factors}). However, in order to perform the quality control of the data or normalize them, other additional annotations need to be provided such as the feature length, 
+the GC content, the biological classification of the features (e.g. Ensembl biotypes), or the chromosome position of each feature.
 
 
 \subsection{Expression data}
 
 The expression data must be provided in a matrix or a data.frame R object, having as many rows as the number of features to be studied and as many columns as the number of
-samples in the experiment. See in the following example part of the count data format from Marioni's dataset:
+samples in the experiment. The following example shows part of the count data for Marioni's dataset:
 <<>>=
 head(mycounts)
 @ 
@@ -93,10 +93,8 @@ The expression data can be both read counts or normalized expression data such a
 
 
 \subsection{Factors}
-Factors are given in a data.frame object as follows. For Marioni's data, we obviously have the factor ``Tissue'', 
-but we can also define another toy factor (``TissueRun'') 
-just to show how the method works. The levels of the factor ``Tissue'' are ``Kidney'' and ``Liver''. The factor ``TissueRun'' combines the sequencing run 
-(we have 2 sequencing runs) with the tissue and hence has four levels: ``Kidney\_1'', ``Liver\_1'', ``Kidney\_2'' and ``Liver\_2''. 
+Factors are the variables indicating the experimental group for each sample. They must be given to the \code{readData} function in a data frame 
+object. This data frame must have as many rows as samples (columns in data object) and as many columns or factors as different sample annotations the user wants to use. For instance, in Marioni's data, we have the factor ``Tissue'', but we can also define another factors (``Run'' or ``TissueRun''). The levels of the factor ``Tissue'' are ``Kidney'' and ``Liver''. The factor ``Run'' has two levels: ``R1'' and ``R2''. The factor ``TissueRun'' combines the sequencing run with the tissue and hence has four levels: ``Kidney\_1'', ``Liver\_1'', ``Kidney\_2'' and ``Liver\_2''. 
 
 Be careful here, the order of the elements of the factor must coincide with the order of the samples (columns) in the expression data file provided.
 
@@ -104,18 +102,19 @@ Be careful here, the order of the elements of the factor must coincide with the 
 myfactors = data.frame(Tissue=c("Kidney","Liver","Kidney","Liver","Liver","Kidney","Liver",
                                 "Kidney","Liver","Kidney"),
                        TissueRun = c("Kidney_1","Liver_1","Kidney_1","Liver_1","Liver_1",
-                                     "Kidney_1","Liver_1","Kidney_2","Liver_2","Kidney_2"))
+                                     "Kidney_1","Liver_1","Kidney_2","Liver_2","Kidney_2"),
+                       Run = c(rep("R1", 7), rep("R2", 3)))
+myfactors
 @ 
 
 
-\subsection{Additional annotation}
+\subsection{Additional biological annotation}
 
-To perform an exploratory analysis before or after the differential expression computation, some additional information is needed, 
-as for example the feature length 
-(which may be used also for normalization purposes), the GC content, the biological classification of the features (e.g. Ensembl biotypes), 
-or the chromosome and position of the feature.
+Some of the exploratory plots in \noiseq{} package require additional biological information such as feature length, GC content, biological 
+classification of features, or chromosome position. You need to provide at least part of this information if you want to either generate 
+the corresponding plots or apply a normalization method that corrects by length.
 
-In the following lines you can see how the R objects containing such information should look like:
+The following code show how the R objects containing such information should look like:
 
 <<>>=
 head(mylength)
@@ -129,15 +128,18 @@ However, it is important to specify the names or IDs of the features in each cas
 The length, GC content or biological groups (e.g. biotypes), could be vectors, matrices or data.frames. 
 If they are vectors, the names of the vector must be the feature names or
 IDs. If they are matrices or data.frame objects, the feature names or IDs must be in the row names of the object. 
-The same applies for chromosome information, which is also a matrix or data.frame.
+The same applies for chromosome position, which is also a matrix or data.frame.
+
+Ensembl Biomart data base provides these annotations for a wide range of species: biotypes (the biological classification of the features),
+GC content, or chromosome position. The latter can be used to estimate the length of the feature. However, it is more accurate computing the length
+from the GTF or GFF annotation file so the introns are not considered.
 
 
 
-\subsection{Usage}
 
-For reading these data and to start working with all the functionalities from \noiseq{} package, the function \code{readData} has to be used. 
-An example on how it works is shown below. 
-The arguments  \texttt{length}, \texttt{gc}, \texttt{biotype}, \texttt{chromosome} and \texttt{factors} receive the objects shown before:
+\subsection{Converting data into a \noiseq{} object}
+
+Once we have created in R the count data matrix, the data frame for the factors and the biological annotation objects (if needed), we have to pack all this information into a \noiseq{} object by using the \code{readData} function. An example on how it works is shown below: 
 
 <<readData>>=
 mydata <- readData(data=mycounts,length=mylength, gc=mygc, biotype=mybiotypes,
@@ -155,18 +157,18 @@ head(featureData(mydata)@data)
 @ 
 
 Note that the features to be used by all the methods in the package will be those in the data expression object. 
-If any of this features has not been included in the additional annotation (if given), the corresponding value will be NA.
+If any of this features has not been included in the additional biological annotation (when provided), the corresponding value will be NA.
 
 
 It is possible to add information to an existing object. For instance, \code{noiseq} function accepts objects generated 
 while using other packages such as \code{DESeq} package.
 In that case, annotations may not be included in the object. The \code{addData} function allows the user to add annotation data to the object. 
-Imagine that you generated the data object like this:
+For instance, if you generated the data object like this:
 <<readData2>>=
 mydata <- readData(data=mycounts,chromosome=mychroms, factors=myfactors)
 @
 
-And now you want to include the length and the biotype of the features. Then you have to use the \code{addData} function:
+And now you want to include the length and the biotypes, you have to use the \code{addData} function:
 
 <<readData3>>=
 mydata <- addData(mydata, length=mylength, biotype=mybiotypes, gc = mygc)
@@ -185,16 +187,14 @@ name but different use, the following command can be used: \code{NOISeq::readDat
 
 % \clearpage
 
-\section{Exploratory analysis}
+\section{Quality control of count data}
 
-Data processing and experimental design in RNA-seq are not straightforward. From the
+Data processing and sequencing experiment design in RNA-seq are not straightforward. From the
 biological samples to the expression quantification, there are many steps in which errors may be produced, despite of the many procedures 
 developed to reduce noise at each one of these steps and to control the quality of the generated data.
 Therefore, once the expression levels (read counts) have been obtained, it is absolutely
-necessary to be able to detect potential biases or contamination 
-before proceeding with further analysis such as differential expression. The technology biases, such as the transcript length, GC
-content, PCR artifacts, uneven transcript read coverage, contamination by off-target transcripts or big
-differences in transcript distributions, are factors that interfere in the linear relationship between transcript
+necessary to be able to detect potential biases or contamination before proceeding with further analysis (e.g. differential expression). 
+The technology biases, such as the transcript length, GC content, PCR artifacts, uneven transcript read coverage, contamination by off-target transcripts or big differences in transcript distributions, are factors that interfere in the linear relationship between transcript
 abundance and the number of mapped reads at a gene locus (counts).
 
 In this section, we present a set of plots to explore the count data that may be helpful to detect these potential biases 
@@ -209,18 +209,19 @@ all these exploratory plots for the comparison of two samples or two experimenta
 \subsection{Generating data for exploratory plots}
 
 There are several types of exploratory plots that can be obtained. They will be described in detail in the following sections. 
-To generate any of these plots, first of all, \code{dat} function must be applied on the input data to obtain the information to be plotted. 
+To generate any of these plots, first of all, \code{dat} function must be applied on the input data (\noiseq{} object) 
+to obtain the information to be plotted. 
 The user must specify the type of plot the data are to be computed for (argument \code{type}). 
 Once the data for the plot have been generated with \code{dat} function, the plot will be drawn with the \emph{explo.plot} function. 
-For instance:
+Therefore, for the quality control plots, we will always proceed like in the following example:
 
 <<dat>>=
 myexplodata <- dat(mydata, type = "biodetection")
-explo.plot(myexplodata)
+explo.plot(myexplodata, plottype = "persample")
 @
 
 
-To save the data in a user-friendly format, see the following example on the \code{dat2save} function:
+To save the data in a user-friendly format, the \code{dat2save} function can be used:
 
 <<nicedata>>=
 mynicedata <- dat2save(myexplodata)
@@ -230,11 +231,12 @@ mynicedata <- dat2save(myexplodata)
 We have grouped the exploratory plots in three categories according to the different questions that may arise during the quality control of the expression data:
 
 \begin{itemize}
- \item Biotype detection: Which kind of features are being detected? Is there any abnormal contamination in the data?
- \item Sequencing depth \& Expression Quantification: Would it be better to increase the sequencing depth to detect more features? 
+ \item \textbf{Biotype detection}: Which kind of features are being detected? Is there any abnormal contamination in the data? Did I choose an appropriate protocol?
+ \item \textbf{Sequencing depth \& Expression Quantification}: Would it be better to increase the sequencing depth to detect more features? 
 Are there too many features with low counts? Are the samples very different regarding the expression quantification?
- \item Sequencing bias detection: Should the expression values be corrected for the length or GC content bias? 
-Should a normalization procedure be applied to account for the differences among RNA composition among samples? 
+ \item \textbf{Sequencing bias detection}: Should the expression values be corrected for the length or the GC content bias? 
+Should a normalization procedure be applied to account for the differences among RNA composition among samples?
+ \item \textbf{Batch effect exploration}: Are the samples clustered in corcondance with the experimental design or with the batch in which they were processed? 
 \end{itemize}
 
 
@@ -242,38 +244,64 @@ Should a normalization procedure be applied to account for the differences among
 
 \subsection{Biotype detection}
 
-If a biological classification of the features is provided (e.g. Ensembl biotypes), the following plots are to see which kind of features are being detected.
-In general, when features are genes, it is expected that most of them will be protein-coding.
+When a biological classification of the features is provided (e.g. Ensembl biotypes), the following plots are useful to see 
+which kind of features are being detected.
+For instance, in RNA-seq, it is expected that most of the genes will be protein-coding so detecting an enrichment in the sample of any other biotype could point to a potential contamination or at least provide information on the sample composition to take decision on the type of analysis to be performed.
 
-Fig. \ref{fig_biodetection} shows the ``biodetection" plot. The bar diagram shows the percentage of each biotype in the genome 
-(i.e. in the whole set of features provided), which proportion has been detected in our sample 
-(with number of counts higher than \texttt{k}=0) and the percentage of each biotype within the sample.
+\subsubsection{Biodetection plot}
+
+The example below shows how to use the \code{dat} and \code{explo.plot} functions to generate the data to be plotted and to draw a biodetection plot per sample. 
+
+<<fig_biodetection,fig=TRUE,width=12>>=
+mybiodetection <- dat(mydata, k = 0, type = "biodetection", factor = NULL)
+par(mfrow = c(1,2))  # we need this instruction because two plots (one per sample) will be generated
+explo.plot(mybiodetection, samples=c(1,2), plottype = "persample")
+@ 
+
+
+Fig. \ref{fig_biodetection} shows the ``biodetection" plot per sample. The gray bar corresponds to the percentage of each biotype in the genome 
+(i.e. in the whole set of features provided), the stripped color bar is the proportion detected in our sample 
+(with number of counts higher than \texttt{k}), and the solid color bar is the percentage of each biotype within the sample.
 The vertical green line separates the most abundant biotypes (in the left-hand side, corresponding to the left axis scale) 
 from the rest (in the right-hand side, corresponding to the right axis scale).
+
+When \texttt{factor=NULL}, the data for the plot are computed separately for each sample. If \texttt{factor} is a string indicating the name of one of the columns in the factor object, the samples are aggregated within each of these experimental conditions and the data for the plot are computed per condition. In this example, samples in columns 1 and 2 from expression data are plotted and the features (genes) are considered to be detected if having a number of counts higher than \texttt{k=0}.
+
 
 \begin{figure}[ht!]
 \centering
 \includegraphics[width=0.9\textwidth]{NOISeq-fig_biodetection}
-\caption{Biodetection plot}
+\caption{Biodetection plot (per sample)}
 \label{fig_biodetection}
 \end{figure}
 
-This is an example on how to use the corresponding functions prior to generate the data to be plotted and then to draw the plot. Since factor=NULL, 
-the data for the plot are computed separately for each sample. If the factor is a character vector indicating the experimental condition for each sample,
-the samples are aggregated within each condition by summing up the counts, and the data for the plot are computed per condition. In this case, 
-samples in columns 1 and 2 from expression data are plotted and the features (genes) are considered to be detected if having a number of counts higher than k=0:
-<<fig_biodetection,fig=TRUE,width=12>>=
-mybiodetection <- dat(mydata, k = 0, type = "biodetection", factor = NULL)
+
+When two samples or conditions are to be compared, it can be more practical to represent both o them in the same plot. Then, two different plots can be generated: one representing the percentage of each biotype in the genome being detected in the sample, and other representing the relative abundance of each biotype within the sample. The following code can be used to obtain such plots:
+
+<<fig_biodetection2,fig=TRUE,width=12>>=
 par(mfrow = c(1,2))  # we need this instruction because two plots (one per sample) will be generated
-explo.plot(mybiodetection, samples=c(1,2))
+explo.plot(mybiodetection, samples=c(1,2), toplot = "protein_coding", plottype = "comparison")
 @ 
 
 
-The ``countsbio" plot, when providing the biological classification for the features, allows to see how the counts are distributed within each biological group, 
-as it is shown in Fig. \ref{fig_boxplot1} and also (in the upper side of the plot) the number of detected features.
-The following code was used to draw the figure. Again, data are computed per sample because no factor was specified (factor = NULL).
-With \emph{explo.plot} and ``countsbio" data, two different plots may be generated. In this case, we chose the ``boxplot" type, 
-that shows the distribution of counts per biotype for samples 1 and 2 and for all the biotypes (because \code{toplot} parameter is 1). 
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=0.9\textwidth]{NOISeq-fig_biodetection2}
+\caption{Biodetection plot (comparison of two samples)}
+\label{fig_biodetection2}
+\end{figure}
+
+In addition, the ``biotype comparison'' plot also performs a proportion test for the chosen biotype (argument \texttt{toplot}) to test if the relative abundance of that biotype is different in the two samples or conditions compared.
+
+
+
+
+\subsubsection{Count distribution per biotype}
+
+The ``countsbio" plot (Fig. \ref{fig_boxplot1}) per biotype allows to see how the counts are distributed within each biological group. In the upper side of the plot, the number of detected features that will be represented in the boxplots is displayed. The values used for the boxplots are either the counts per million (if \texttt{norm = FALSE}) or the values provided by the use (if \texttt{norm = TRUE})
+The following code was used to draw the figure. Again, data are computed per sample because no factor was specified 
+(\texttt{factor=NULL}).
+To obtain this plot using the \emph{explo.plot} function and the ``countsbio" data, we have to indicate the ``boxplot" type in the \texttt{plottype} argument, choose only one of the samples (\texttt{samples = 1}, in this case), and all the biotypes (by setting \code{toplot} parameter to 1 or "global"). 
 
 <<fig_boxplot1,fig=TRUE,width=10>>=
 mycountsbio = dat(mydata, factor = NULL, type = "countsbio")
@@ -283,8 +311,7 @@ explo.plot(mycountsbio, toplot = 1, samples = 1, plottype = "boxplot")
 \begin{figure}[ht!]
 \centering
 \includegraphics[width=\textwidth]{NOISeq-fig_boxplot1}
-\caption{Count distribution per biotype in two samples (for genes with more than 0 counts). At the upper part of the plot, the number of detected features 
-within each biotype group is displayed.}
+\caption{Count distribution per biotype in one of the samples (for genes with more than 0 counts). At the upper part of the plot, the number of detected features within each biotype group is displayed.}
 \label{fig_boxplot1}
 \end{figure}
 
@@ -296,16 +323,19 @@ within each biotype group is displayed.}
 \subsection{Sequencing depth \& Expression Quantification}
 
 The plots in this section can be generated by only providing the expression data, since no other biological information is required. 
-Their purpose is to assess if the sequencing depth of the samples is enough to detect the features of interest and to get a good quantification of their expression.
+Their purpose is to assess if the sequencing depth of the samples is enough to detect the features of interest and to get a good 
+quantification of their expression.
 
-``Saturation" plots allow you to know how many of the features in the genome are being detected with more than a given number of counts (e.g. k=0 or k=5) 
-and also see how this number of detected features would change when increasing sequencing depth. 
-This plot can be generated by considering either all the features or for each biological group (biotypes), if available.
+
+\subsubsection{Saturation plot}
+
+The ``Saturation" plot shows the number of features in the genome detected with more than \texttt{k} counts with the sequencing depth of the sample, and with higher and lower simulated sequencing depths.  
+This plot can be generated by considering either all the features or only the features included in a given biological group (biotype), if this information is available.
 First, we have to generate the saturation data with the function \code{dat} and then we can use the resulting object to obtain, 
-for instance, the plots in Fig. \ref{fig_sat1} and \ref{fig_sat2} by applying \code{explo.plot} function. When the number of samples to plot is 1 or 2, 
-a right axis and bars are drawn to show the number of new features detected when increasing the sequencing depth in one million of reads. 
-If more than 2 samples are to be plotted, it is difficult to visualize the newdetection bars, 
-so the plot will only show the lines indicating the number of detected features at each sequencing depth.
+for instance, the plots in Fig. \ref{fig_sat1} and \ref{fig_sat2} by applying \code{explo.plot} function. The lines show how the number of detected features increases with depth. When the number of samples to plot is 1 or 2, 
+bars indicating the number of new features detected when increasing the sequencing depth in one million of reads are also drawn. In that case, lines values are to be read in the left Y axis and bar values in the right Y axis. 
+If more than 2 samples are to be plotted, it is difficult to visualize the ``newdetection bars'', 
+so only the lines are shown in the plot.
 
 <<fig_sat1,fig=TRUE>>=
 mysaturation = dat(mydata, k = 0, ndepth = 7, type = "saturation")
@@ -322,8 +352,7 @@ from this total sequencing depth. The bars are associated to the right Y axis an
 at each sequencing depth. The legend in the gray box also indicates the percentage of total features detected with more than $k=0$ counts 
 at the real sequencing depth.
 
-It is possible to compare more than 2 samples, but then the information in the right axis is not provided as it would be difficult to distinguish so many bars. 
-You can compare up to twelve samples. In Fig. \ref{fig_sat2}, four samples are compared and we can see, for instance, 
+Up to twelve samples can be displayed in this plot. In Fig. \ref{fig_sat2}, four samples are compared and we can see, for instance, 
 that in kidney samples the number of detected features is higher than in liver samples.  
 
 \begin{figure}[ht!]
@@ -342,9 +371,9 @@ that in kidney samples the number of detected features is higher than in liver s
 \end{figure}
 
 
-It is also interesting to visualize the count distribution for all the samples, either for all the features or for the features belonging to a certain biological 
-group. Fig. \ref{fig_boxplot2} shows this information for the biotype ``protein\_coding", which can be generated with the following code 
-on the ``countsbio" object obtained in the previous section.
+\subsubsection{Count distribution per sample}
+
+It is also interesting to visualize the count distribution for all the samples, either for all the features or for the features belonging to a certain biological group (biotype). Fig. \ref{fig_boxplot2} shows this information for the biotype ``protein\_coding", which can be generated with the following code on the ``countsbio" object obtained in the previous section by setting the \texttt{samples} parameter to  \texttt{NULL}.
 <<fig_boxplot2,fig=TRUE>>=
 explo.plot(mycountsbio, toplot = "protein_coding", samples = NULL, plottype = "boxplot")
 @ 
@@ -356,13 +385,13 @@ explo.plot(mycountsbio, toplot = "protein_coding", samples = NULL, plottype = "b
 \label{fig_boxplot2}
 \end{figure}
 
+
+
+\subsubsection{Sensitivity plot}
+
 Features with low counts are, in general, less reliable and may introduce noise in the data that makes more difficult to extract the relevant information, 
-for instance, the differentially expressed features. In fact, we include some methods in \noiseq{} package to filter out these low count features and 
-the sensitivity plot in Fig. \ref{fig_boxplot3} indicates the proportion of such features that are present in our data and also, if necessary, 
-may help to decide about the filtering method to be applied. In this sensitivity plot, the bars show the percentage of features within each sample 
-having more than 0 counts per million (CPM), or more than 1, 2, 5 and 10 CPM. The horizontal lines are the corresponding percentage of features 
-with those CPM in at least one of the samples. In the upper side of the plot, the sequencing depth of each sample (in million reads) is given. 
-The following code is for drawing this figure.
+for instance, the differentially expressed features. We have implemented some methods in the \noiseq{} package to filter out these low count features. The ``Sensitivity plot'' in Fig. \ref{fig_boxplot3} helps to decide the threshold to remove low-count features by indicating the proportion of such features that are present in our data. In this plot, the bars show the percentage of features within each sample having more than 0 counts per million (CPM), or more than 1, 2, 5 and 10 CPM. The horizontal lines are the corresponding percentage of features with those CPM in at least one of the samples (or experimental conditions if the \texttt{factor} parameter is not \texttt{NULL}). In the upper side of the plot, the sequencing depth of each sample (in million reads) is given. 
+The following code can be used for drawing this figure.
  
 <<fig_boxplot3,fig=TRUE>>=
 explo.plot(mycountsbio, toplot = 1, samples = NULL, plottype = "barplot")
@@ -384,8 +413,7 @@ explo.plot(mycountsbio, toplot = 1, samples = NULL, plottype = "barplot")
 Prior to perform further analyses such as differential expression, it is essential to normalize data to make the samples comparable and 
 remove the effect of technical biases from the expression estimation. The plots presented in this section are very useful for detecting the possible biases in
 the data. In particular, the biases that can be studied are: the feature length effect, the GC content and the differences in RNA composition. 
-In addition, these are diagnostic plots, which means that they are not only descriptive but an statistical test is also conducted to help the user to decide
-whether the bias is present and data needs normalization or not.
+In addition, these are diagnostic plots, which means that they are not only descriptive but an statistical test is also conducted to help the user to decide whether the bias is present and the data needs normalization.
 
 
 \subsubsection{Length bias}
@@ -393,15 +421,13 @@ whether the bias is present and data needs normalization or not.
 The ``lengthbias" plot describes the relationship between the feature length and the expression values. 
 Hence, the feature length must be included in the input object created using the \code{readData} function. The data for this plot is generated as follows. 
 The length is divided in intervals (bins) containing 200 features and the middle point of each bin is depicted in X axis. 
-For each bin, the 5\% trimmed mean of the corresponding expression values is computed and depicted in Y axis. If the number of samples or conditions 
+For each bin, the 5\% trimmed mean of the corresponding expression values (CPM if \texttt{norm=FALSE} or values provided if \texttt{norm=TRUE}) is computed and depicted in Y axis. If the number of samples or conditions 
 to appear in the plot is 2 or less and no biotype is specified (toplot = ``global"), a diagnostic test is provided. 
 A cubic spline regression model is fitted to explain the relationship between length and expression. 
 Both the model p-value and the coefficient of determination (R2) are shown in the plot as well as the fitted regression curve. 
-If the model p-value is significant and R2 value is high (more than 70\%), the expression depends on the feature length and the curve shows
-the type of dependence. 
+If the model p-value is significant and R2 value is high (more than 70\%), the expression depends on the feature length and the curve shows the type of dependence. 
  
-Fig. \ref{fig_length} shows an example of this plot. In this case, the ``lengthbias" data were generated for each condition (kidney and liver) using the argument
-\code{factor}.
+Fig. \ref{fig_length} shows an example of this plot. In this case, the ``lengthbias" data were generated for each condition (kidney and liver) using the argument \texttt{factor}.
 
 <<fig_length,results=hide,fig=TRUE>>=
 mylengthbias = dat(mydata, factor = "Tissue", type = "lengthbias")
@@ -410,7 +436,7 @@ explo.plot(mylengthbias, samples = NULL, toplot = "global")
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.8\textwidth]{NOISeq-fig_length}
+\includegraphics[width=\textwidth, height=0.5\textwidth]{NOISeq-fig_length}
 \caption{Gene length versus expression.}
 \label{fig_length}
 \end{figure}
@@ -437,8 +463,8 @@ Both the model p-value and the coefficient of determination (R2) are shown in th
 If the model p-value is significant and R2 value is high (more than 70\%), the expression will depend on the feature GC content 
 and the curve will show the type of dependence. 
  
-An example of this plot is in Fig. \ref{fig_GC}. In this case, the ``GCbias" data were generated for each condition (kidney and liver) 
-using the argument \code{factor}.
+An example of this plot is in Fig. \ref{fig_GC}. In this case, the ``GCbias" data were also generated for each condition 
+(kidney and liver) using the argument \texttt{factor}.
 
 <<fig_GC,results=hide,fig=TRUE>>=
 myGCbias = dat(mydata, factor = "Tissue", type = "GCbias")
@@ -447,7 +473,7 @@ explo.plot(myGCbias, samples = NULL, toplot = "global")
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.8\textwidth]{NOISeq-fig_GC}
+\includegraphics[width=\textwidth, height=0.5\textwidth]{NOISeq-fig_GC}
 \caption{Gene GC content versus expression.}
 \label{fig_GC}
 \end{figure}
@@ -459,17 +485,14 @@ explo.plot(myGCbias, samples = NULL, toplot = "global")
 
 When two samples have different RNA composition, the distribution of sequencing reads across the features is different in such a way that although 
 a feature had the same number of read counts in both samples, it would not mean that it was equally expressed in both. 
-To check if this bias is present in the data, the ``cd" plot and the correponding diagnostic test can be used. In this case, each sample $s$ 
-is compared to the reference sample $r$ (which can be arbitrarily chosen). To do that, M values are computed as $log2(counts_s=counts_r)$. 
+To check if this bias is present in the data, the ``cd" plot and the correponding diagnostic test can be used. In this case, each sample $s$ is compared to the reference sample $r$ (which can be arbitrarily chosen). To do that, M values are computed as $log2(counts_s=counts_r)$. 
 If no bias is present, it should be expected that the median of M values for each comparison is 0. Otherwise, it would
 be indicating that expression levels in one of the samples tend to be higher than in the other, and this could lead to false discoveries 
 when computing differencial expression. Confidence intervals for the M median are also computed by bootstrapping. If value 0 does not fall inside the interval, 
 it means that the deviation of the sample with regard to the reference sample is statistically significant. 
-Therefore, a normalization procedure such as Upper Quartile, TMM or DESeq should be used to correct this effect and make the samples comparable 
-before computing differential expression. Confidence intervals can be visualized by using \code{show} function. 
+Therefore, a normalization procedure such as Upper Quartile, TMM or DESeq should be used to correct this effect and make the samples comparable before computing differential expression. Confidence intervals can be visualized by using \texttt{show} function. 
 
-See below an usage example and the resulting plot in Fig. \ref{fig_countdistr}. It must be indicated if the data provided are already normalized (norm = TRUE) 
-or not (norm = FALSE). The reference sample may be indicated with the refColumn parameter (by default, the first column is used). 
+See below an usage example and the resulting plot in Fig. \ref{fig_countdistr}. It must be indicated if the data provided are already normalized (\texttt{norm=TRUE}) or not (\texttt{norm=FALSE}). The reference sample may be indicated with the refColumn parameter (by default, the first column is used). 
 Additional plot parameters may also be used to modify some aspects of the plot.
 <<fig_countdistr,fig=TRUE>>=
 mycd = dat(mydata, type = "cd", norm = FALSE, refColumn = 1)
@@ -483,54 +506,80 @@ explo.plot(mycd)
 \label{fig_countdistr}
 \end{figure}
 
-In the plot can be seen that the M median is deviated from 0 in most of the cases. This is corraborated by the confidence intervals for the M median.
+In the plot can be seen that the $M$ median is deviated from 0 in most of the cases. This is corraborated by the confidence intervals for the $M$ median.
 
 % \clearpage
+
+
+\subsection{Batch effect exploration} \label{sec_PCA}
+
+One of the techniques that can be used to visualize if the experimental samples are clustered according to the experimental design or if there is an unwanted source of noise in the data that hampers this clustering is the Principal Component Analysis (PCA).
+
+To illustrate the utility of the PCA plots, we took Marioni's data and artificially added a batch effect to the first four samples that would belong then to bath 1. The rest of samples would belong to batch2, so we also create an additional factor to collect the batch information.
+
+<<randomBatchEffect>>=
+set.seed(123)
+mycounts2 = mycounts
+mycounts2[,1:4] = mycounts2[,1:4] + runif(nrow(mycounts2)*4, 3, 5)
+myfactors = data.frame(myfactors, "batch" = c(rep(1,4), rep(2,6)))
+mydata2 = readData(mycounts2, factors = myfactors)
+@
+
+Now we can run the following code to plot the samples scores for the two principal components of the PCA and color them by the factor ``Tissue'' (left hand plot) or by the factor ``batch'' (right hand plot): 
+
+<<fig_PCA,fig=TRUE>>=
+myPCA = dat(mydata2, type = "PCA")
+par(mfrow = c(1,2))
+explo.plot(myPCA, factor = "Tissue")
+explo.plot(myPCA, factor = "batch")
+@
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth, height=0.5\textwidth]{NOISeq-fig_PCA}
+\caption{PCA plot colored by tissue (left) and by batch (right)}
+\label{fig_PCA}
+\end{figure}
+
+We can appreciate in these plots that the two batches are quite separated so removing the batch effect should improve the clustering of the samples. More information on how to do that with \noiseq{} can be found in Section \ref{sec_batch}.
+
 
 
 \subsection{Quality Control report}
 
 The \code{QCreport} function allows the user to quickly generate a pdf report showing the exploratory plots described in this section 
-to compare either two samples (if \code{factor} is NULL) or two experimental conditions (if \code{factor} is indicated). 
+to compare either two samples (if \texttt{factor=NULL}) or two experimental conditions (if \texttt{factor} is indicated). 
 Depending on the biological information provided (biotypes, length or GC content), the number of plots included in the report may differ. 
 
 <<QCreportExample,results=hide>>=
-QCreport(mydata, samples = NULL, factor = "Tissue")
+QCreport(mydata, samples = NULL, factor = "Tissue", norm = FALSE)
 @ 
 
+This report can be generated before normalizing the data (\texttt{norm = FALSE}) or after normalization to check if unwanted effects were corrected (\texttt{norm = TRUE}).
 
+Please note that the data are log-transformed when computing Principal Component Analysis (PCA).
 
 
 
 \vspace{1cm}
 
 
-
-
-\section{Differential expression}
-
-The \noiseq{} package computes differential expression between two experimental conditions given the expression level of the considered features. 
-The package includes three non-parametric approaches for differential expression analysis: \noiseq{}-real for technical replicates, 
-\noiseq{}-sim for experiments without replications and \noiseqbio{}, which is optimized for the use of biological replicates. 
-All three methods take read counts from RNA-seq as the expression values, in addition to previously normalized data and
-read counts from other NGS technologies.
+\section{Normalization, Low-count filtering \& Batch effect correction}
 
 The normalization step is very important in order to make the samples comparable and to remove possibles biases in the data. 
 It might also be useful to filter out low expression data prior to differential expression analysis, since they are less reliable 
 and may introduce noise in the analysis.
 
-Next sections explain how to use \noiseq{} package to normalize and filter data, to apply the three differential expression analysis and to visualize the results.
-
-
+Next sections explain how to use \noiseq{} package to normalize and filter data before performing any statistical analysis.
 
 
 \subsection{Normalization} \label{sec_norm}
 
 We strongly recommend to normalize the counts to correct, at least, sequencing depth bias. 
-The normalization techniques implemented in \code{NOISeq} are RPKM \cite{Mortazavi2008},
-Upper Quartile \cite{Bullard2010} and TMM, which stands for Trimmed Mean of M values \cite{Robinson2010}. 
+The normalization techniques implemented in \noiseq{} are RPKM \cite{Mortazavi2008},
+Upper Quartile \cite{Bullard2010} and TMM, which stands for Trimmed Mean of M values \cite{Robinson2010}, but the package accepts data normalized with any other method as well as data previously transformed to remove batch effects or to reduce noise. 
 
-Normalization functions \code{rpkm}, \code{tmm} and \code{uqua} can be used by themselves. Please, find below some examples on how to apply them:
+The normalization functions (\code{rpkm}, \code{tmm} and \code{uqua}) can be applied to common R matrix and data frame objects. Please, find below some examples on how to apply them to data matrix extracted from \noiseq{} data objects:
 
 <<normalization>>=
 myRPKM = rpkm(assayData(mydata)$exprs, long = mylength, k = 0, lc = 1)
@@ -539,23 +588,18 @@ myTMM = tmm(assayData(mydata)$exprs, long = 1000, lc = 0)
 head(myRPKM[,1:4])
 @ 
 
-If the length of the features is provided and any of the three normalization methods is chosen, then the expression values are divided by $(length/1000)^{lc}$ 
-($lc = 1$ for RPKM method). Thus, although Upper Quartile and TMM methods themselves do not correct for the length of the features, 
-\noiseq{} allows the users to combine these normalization procedures with an additional length correction whenever the length information is available.
-If $lc = 0$, no length correction is applied.
+If the length of the features is provided to any of the normalization functions, the expression values are divided by 
+$(length/1000)^{lc}$. Thus, although Upper Quartile and TMM methods themselves do not correct for the length of the features, 
+\noiseq{} allows the users to combine these normalization procedures with an additional length correction whenever the length information is available. If $lc = 0$, no length correction is applied.
+To obtain RPKM values, $lc = 1$ in \code{rpkm} function must be indicated. If $long = 1000$ in \code{rpkm} function, CPM values (counts per million) are returned.   
 
-In addition, when using \noiseq{} or \noiseqbio{} to compute differential expression, normalization can be done automatically 
-by choosing the corresponding value for the parameter ``norm". These methods also accept expression values normalized with other packages or procedures. 
-Please, read sections \ref{sec_param1} and \ref{sec_param2} to get more information on this issue.
- 
+The $k$ parameter is used to replace the zero values in the expression matrix with other non-zero value in order to avoid indetermination in some calculations such as fold-change. If $k=NULL$, each 0 is replaced with the midpoint between 0 and the next non-zero value in the matrix. 
 
 
 
+\subsection{Low-count filtering} \label{sec_filt}
 
-\subsection{Low count filter} \label{sec_filt}
-
-Excluding features with low counts improves, in general, 
-differential expression results, no matter the method being used,
+Excluding features with low counts improves, in general, differential expression results, no matter the method being used,
 since noise in the data is reduced. However, the best procedure
 to filter these low count features has not been yet decided nor
 implemented in the differential expression packages. \noiseq{} includes three methods to filter out features with low
@@ -567,41 +611,124 @@ $CPM \times s$. Features with sum of expression values below the condition cutof
 conditions are removed. Also a cutoff for the coefficient of variation (in percentage) per condition
 may be established to eliminate features with inconsistent expression values.
 \item \textbf{Wilcoxon test} (method 2): For each feature and condition,  $H_0: m=0$ is tested versus $H_1: m>0$, where $m$ is the median of counts per condition. 
-Features with p-value $> 0.05$ in all conditions are filtered out. This method is only recommended when the number of replicates per condition is at least 5.
+Features with p-value $> 0.05$ in all conditions are filtered out. P-values can be corrected for multiple testing using the \texttt{p.adj} option. This method is only recommended when the number of replicates per condition is at least 5.
 \item \textbf{Proportion test} (method 3): Similar procedure to the Wilcoxon test but testing $H_0: p=p_0$ versus $H_1: p>p_0$, where $p$ is the 
-feature relative expression and $p_0 = CPM/10^6$. Features with p-value $> 0.05$ in all conditions are filtered out.
+feature relative expression and $p_0 = CPM/10^6$. Features with p-value $> 0.05$ in all conditions are filtered out. P-values can be corrected for multiple testing using the \texttt{p.adj} option.
 \end{itemize}
 
 This is an usage example of function \code{filtered.data} directly on count data with CPM method (method 1): 
 <<filtering>>=
-myfilt = filtered.data(mycounts, factor = myfactors$Tissue, norm = FALSE, depth = NULL, method = 1, cv.cutoff = 100, cpm = 1)
+myfilt = filtered.data(mycounts, factor = myfactors$Tissue, norm = FALSE, depth = NULL, method = 1, cv.cutoff = 100, cpm = 1, p.adj = "fdr")
 @ 
 
-By default, \noiseqbio{} includes the possibility of filtering data. The method to be used is
-indicated with the ``filter" parameter.
+The ``Sensitivity plot'' described in previous section can help to take decisions on the CPM threshold to use in methods 1 and 3.
+
+
+
+
+\subsection{Batch effect correction} \label{sec_batch}
+
+When a batch effect is detected in the data or the samples are not properly clustered due to an unknown source of technical noise, it is usually appropriate to remove this batch effect or noise before proceeding with the differential expression analysis (or any other type of analysis).
+
+\texttt{ARSyNseq} (ASCA Removal of Systematic Noise for sequencing data) is an R function implemented in \noiseq{} package that is designed for filtering the noise associated to identified or unidentified batch effects. The ARSyN method \cite{nueda2012} combines analysis
+of variance (ANOVA) modeling and multivariate analysis of estimated effects (PCA) to identify the structured variation of either the effect of the batch (if the batch information is provided) or the ANOVA errors (if the batch information is unknown). Thus, ARSyNseq returns a filtered data set that is rich in the information of interest and includes only the random noise required for inferential analysis.
+
+The main arguments of the \texttt{ARSyNseq} function are:
+\begin{itemize}
+ \item \texttt{data}: A Biobase's eSet object created with the \texttt{readData} function.
+ \item \texttt{factor}: Name of the factor (as it was given to the \texttt{readData} function) to be used in the ARSyN model (e.g. the factor containing the batch information). When it is NULL, all the factors are considered.
+  \item \texttt{batch}: TRUE to indicate that the \texttt{factor} argument indicates the batch information. In this case, the \texttt{factor} argument must be used to specify the names of the onlu factor containing the information of the batch.
+  \item \texttt{norm}: Type of normalization to be used. One of ``rpkm'' (default), ``uqua'', ``tmm'' or ``n'' (if data are already normalized). If length was provided through the \texttt{readData} function, it will be considered for the normalization (except for ``n''). Please note that if a normalization method if used, the arguments \texttt{lc} and  \texttt{k} are set to 1 and 0 respectively.
+  \item \texttt{logtransf}: If FALSE, a log-transformation will be applied on the data before computing ARSyN model 
+  to improve the results of PCA on count data.
+\end{itemize}
+
+Therefore, we can differentiate two types of analysis:
+\begin{enumerate}
+\item When batch is identified with one of the factors described in the argument \texttt{factor} of the \texttt{data} object, \texttt{ARSyNseq}
+  estimates this effect and removes it by estimating the main PCs of the ANOVA effects associated. In such case \texttt{factor} argument 
+    will be the name of the batch and \texttt{batch=TRUE}.  
+\item When batch is not identified, the model estimates the effects associated to each factor of interest and analyses if there exists 
+  systematic noise in the residuals. If there is batch effect, it will be identified and removed by estimating the main PCs of these residuals.
+  In such case \texttt{factor} argument can have several factors and \texttt{batch=FALSE}.  
+\end{enumerate}
+
+
+We will use the toy example generated in Section \ref{sec_PCA} to illustrate how \texttt{ARSyNseq} works. This is the code to use 
+\texttt{ARSyNseq} batch effect correction when the user knows the batch in which the samples were processed, and to represent a PCA with the filtered data in order to see how the batch effect was corrected (Figure \ref{fig_knownBatch}:
+
+<<fig_knownBatch,fig=TRUE>>=
+mydata2corr1 = ARSyNseq(mydata2, factor = "batch", batch = TRUE, norm = "rpkm",  logtransf = FALSE)
+myPCA = dat(mydata2corr1, type = "PCA")
+par(mfrow = c(1,2))
+explo.plot(myPCA, factor = "Tissue")
+explo.plot(myPCA, factor = "batch")
+@
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=\textwidth, height=0.5\textwidth]{NOISeq-fig_knownBatch}
+\caption{PCA plot after correcting a known batch effect with \texttt{ARSyNseq}. The samples are colored by tissue (left) and by batch (right)}
+\label{fig_knownBatch}
+\end{figure}
+
+Let us suppose now that we do not know the batch information. However, we can appreciate in the PCA plot of Section \ref{sec_PCA} that there is an unknown source of noise that prevents the samples from clustering well. In this case, we can run the following code to reduce 
+the unidentified batch effect and to draw the PCA plots on the filtered data:
+
+<<fig_unknownBatch,fig=TRUE>>=
+mydata2corr2 = ARSyNseq(mydata2, factor = "Tissue", batch = FALSE, norm = "rpkm",  logtransf = FALSE)
+myPCA = dat(mydata2corr2, type = "PCA")
+par(mfrow = c(1,2))
+explo.plot(myPCA, factor = "Tissue")
+explo.plot(myPCA, factor = "batch")
+@
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=\textwidth, height=0.5\textwidth]{NOISeq-fig_unknownBatch}
+\caption{PCA plot after correcting an unidentified batch effect with \texttt{ARSyNseq}. The samples are colored by tissue (left) and by batch (right)}
+\label{fig_unknownBatch}
+\end{figure}
+
+
+\vspace{1cm}
+
+
+
+
+\section{Differential expression}
+
+The \noiseq{} package computes differential expression between two experimental conditions given the expression level of the considered features. 
+The package includes two non-parametric approaches for differential expression analysis: \noiseq{} for technical replicates or no replication at all, and \noiseqbio{}, which is optimized for the use of biological replicates. 
+Both methods take read counts from RNA-seq as the expression values, in addition to previously normalized data and
+read counts from other NGS technologies.
+
+In the previous section, we described how to use normalization and filtering functions prior to perform differential expression analysis.
+However, when using \noiseq{} or \noiseqbio{} to compute differential expression, it is not necessary to normalize or filter low counts before applying these methods because they include these options. Thus, normalization can be done automatically 
+by choosing the corresponding value for the parameter \texttt{norm}. Furthermore, they also accept expression values normalized with other packages or procedures. If the data have been previously normalized, \texttt{norm} parameter must be set to ``n''. Regarding the low-count filtering, it is not necessary to filter in \noiseq{} method. In contrast, it is recommended to do it in \noiseqbio{}, which by default filters out low-count features with CPM method (\texttt{filter=1}).
+
+The following sections describe in more detail the \noiseq{} and \noiseqbio{} methods.
 
 
 
 \subsection{NOISeq} \label{sec_param1}
 
 \noiseq{} method was designed to compute differential expression on data with technical replicates (NOISeq-real) or no replicates at all (NOISeq-sim). 
-If there are technical replicates available, it summarizes them by summing up them. It is also possible to apply this method on biological replicates, 
-that are averaged instead of summed. However, for biological replicates we strongly recommend \noiseqbio{}. 
-\noiseq{} computes the following differential expression statistics for each feature: $M$ (which is the $log_2$-ratio of the two conditions) and $D$ 
-(the value of the difference between conditions). Expression levels equal to 0 are replaced with the given constant $k>0$, in order to avoid 
-infinite or undetermined $M$-values. A feature is considered to be differentially expressed if its
-corresponding $M$ and $D$ values are likely to be higher than in noise. Noise distribution is obtained by comparing all pairs of replicates 
-within the same condition. The corresponding $M$ and $D$ values are pooled together to generate the distribution. 
+If there are technical replicates available, it summarizes them by summing up them. It is also possible to apply this method on biological replicates, that are averaged instead of summed. However, for biological replicates we strongly recommend \noiseqbio{}. 
+\noiseq{} computes the following differential expression statistics for each feature: 
+$M$ (which is the $log_2$-ratio of the two conditions) and $D$ (the value of the difference between conditions). 
+Expression levels equal to 0 are replaced with the given constant $k>0$, in order to avoid 
+infinite or undetermined $M$-values. If $k=NULL$, the 0 is replaced by the midpoint between 0 and the next non-zero value 
+in the expression matrix.
+A feature is considered to be differentially expressed if its corresponding $M$ and $D$ values are likely to be higher than in noise. Noise distribution is obtained by comparing all pairs of replicates within the same condition. 
+The corresponding $M$ and $D$ values are pooled together to generate the distribution. 
 Changes in expression between conditions with the same magnitude than changes in expression between replicates within the same condition 
 should not be considered as differential expression. Thus, by comparing the $(M,D)$ values of a given feature against the noise
 distribution, \noiseq{} obtains the ``probability of differential expression'' for this feature. 
 If the odds Pr(differential expression)/Pr(non-differential expression) are higher
 than a given threshold, the feature is considered to be differentially expressed between conditions. 
-For instance, an odds value of 4:1 is equivalent to $q$ = Pr(differential expression) = 0.8 and it means that the feature is 4 times more likely 
-to be differentially expressed than non-differentially expressed. The \noiseq{} algorithm compares replicates
-within the same condition to estimate noise distribution (NOISeq-real). When no replicates are available, NOISeq-sim simulates technical replicates 
-in order to estimate the differential expression probability. Please remember that to obtain a really reliable statistical results, 
-you need biological replicates. NOISeq-sim simulates technical replicates from a multinomial distribution, 
+For instance, an odds value of 4:1 is equivalent to $q$ = Pr(differential expression) = 0.8 and it means that the feature is 4 times more likely to be differentially expressed than non-differentially expressed. The \noiseq{} algorithm compares replicates
+within the same condition to estimate noise distribution (NOISeq-real). When no replicates are available, NOISeq-sim simulates technical replicates in order to estimate the differential expression probability. Please remember that to obtain a really reliable statistical results, you need biological replicates. NOISeq-sim simulates technical replicates from a multinomial distribution, 
 so be careful with the interpretation of the results when having no replicates, since they are only an
 approximation and are only showing which genes are presenting a higher change between conditions in your particular samples.
 
@@ -632,6 +759,8 @@ Table \ref{table:summary} summarizes all the input options and includes some rec
 \end{table}
 
 
+Please note that \texttt{norm = "n"} argument should be used in \texttt{noiseq} or \texttt{noiseqbio} whenever the data have been previously normalized or corrected for a batch effect.
+
 
 
 \subsubsection{NOISeq-real: using available replicates}
@@ -650,7 +779,7 @@ In RNA-seq or similar sequencing technologies, the counts from technical replica
 Thus, this is the way the algorithm summarizes the information from
 technical replicates to compute M and D signal values (between different conditions). However, for biological replicates, 
 other summary statistics such us the mean may be more meaningful. \noiseq{} calculates the mean of the biological replicates 
-but we recommend to use \noiseqbio{} when having biological replicates.
+but we strongly recommend to use \noiseqbio{} when having biological replicates.
 
 Here there is an example with technical replicates and count data normalized by \code{rpkm} method. Please note that, 
 since the factor ``Tissue'' has two levels, we do not need to indicate which conditions are to be compared. 
@@ -753,7 +882,7 @@ mynoiseqbio = noiseqbio(mydata, k = 0.5, norm = "rpkm", factor="Tissue", lc = 1,
 
 \subsection{Results}\label{sec_deg}
 
-\subsubsection{Output object}
+\subsubsection{NOISeq output object}
 
 \noiseq{} returns an \code{Output} object containing the following elements:
 
@@ -788,7 +917,7 @@ simulated replicate will have 20\% of the total reads of the only available repl
   \texttt{v}: Variability of the size of each simulated replicate (only used by NOISeq-sim).  
 \end{itemize}
 
-For example, you can use the following instruction to see the differential expression results:
+For example, you can use the following instruction to see the differential expression results for \code{NOISeq}:
 
 <<>>=
 head(mynoiseq@results[[1]])
@@ -797,6 +926,9 @@ head(mynoiseq@results[[1]])
 The output \code{myresults@results[[1]]\$prob} gives the estimated probability of differential expression for each feature. 
 Note that when using \noiseq{}, these probabilities are not equivalent to p-values. The higher the probability, the more likely that the difference in expression 
 is due to the change in the experimental condition and not to chance. See Section \ref{sec_deg} to learn how to obtain the differentially expressed features.
+
+
+
 
 
 
@@ -825,10 +957,9 @@ Hence, in this case, it would be more convenient to use $q=0.95$.
 
 \subsubsection{Plots on differential expression results}
 
-\emph{Expression plot}
+\textbf{Expression plot}
 
-Once differential expression has been computed, it is interesting to plot the expression values in each condition 
-and highlight the features declared as differentially expressed.
+Once differential expression has been computed, it is interesting to plot the average expression values of each condition and highlight the features declared as differentially expressed.
 It can be done with the \code{DE.plot}. 
 
 To plot the summary of the expression values in both conditions as in Fig. \ref{fig_summ_expr}, please write the following code 
@@ -846,11 +977,10 @@ DE.plot(mynoiseq, q = 0.9, graphic = "expr", log.scale = TRUE)
 \end{figure}
 
 
-\emph{MD plot}
+\textbf{MD plot}
 
-Instead of plotting the expression values, one may be interested in plotting the $(M,D)$ values as in Fig. \ref{fig_summ_MD}. 
-Remember that $M$ is the log-fold-change and $D$ is the absolute value of the difference between conditions.
-This is an example of the code to get such a plot ($D$ values are displayed in log-scale). 
+Instead of plotting the expression values, it is also interesting to plot the log-fold change ($M$) and the absolute value of the difference in expression between conditions ($D$) as in Fig. \ref{fig_summ_MD}. 
+This is an example of the code to get such a plot ($D$ values are displayed in log-scale) from \code{NOISeq} output (it is analogous for \code{NOISeqBIO} ouput). 
 <<fig_summ_MD,fig=TRUE>>=
 DE.plot(mynoiseq, q = 0.8, graphic = "MD")
 @ 
@@ -863,16 +993,16 @@ DE.plot(mynoiseq, q = 0.8, graphic = "MD")
 \end{figure}
 
 
-\emph{Manhattan plot}
+\textbf{Manhattan plot}
 
-The Manhattan plot can be used to display the features expression across the chromosomes. 
-Expression for the two conditions under comparison is shown in the same plot. 
-Users may choose either plotting all the chromosomes or only some of them, 
+The Manhattan plot can be used to display the expression of the genes across the chromosomes. 
+The expression for both conditions under comparison is shown in the plot. 
+The users may choose either plotting all the chromosomes or only some of them, 
 and also if the chromosomes are depicted consecutively (useful for prokaryote organisms) 
 or separately (one per line).
 If a $q$ cutoff is provided, then differentially expressed features are highlighted in a different color.
 The following code shows how to draw the Manhattan plot from the output object returned by \code{NOISeq} or \code{NOISeqBIO}. 
-In this case, using Marioni's data, the log-expression is represented for two chromosomes (see Fig. \ref{fig_manhattan}). 
+In this case, using Marioni's data, the expression (log-transformed) is represented for two chromosomes (see Fig. \ref{fig_manhattan}). 
 Note that the chromosomes will be depicted in the same order that are given to ``chromosomes" parameter. 
 
 Gene expression is represented in gray. Lines above 0 correspond to the first condition under comparison (kidney) 
@@ -907,7 +1037,7 @@ dev.off()
 
 
 
-\emph{Distribution of differentially expressed features per chromosomes or biotypes}
+\textbf{Distribution of differentially expressed features per chromosomes or biotypes}
 
 This function creates a figure with two plots if both chromosomes and biotypes information is provided. 
 Otherwise, only a plot is depicted with either the chromosomes or biotypes (if information of any of them is available). The $q$ cutoff must be provided.
@@ -989,10 +1119,16 @@ M.D. Robinson, and A. Oshlack.
 \newblock \emph{Genome Biology}, 11: R25, 2010.
 
 
+\bibitem{nueda2012}
+M. Nueda, A. Conesa, and A. Ferrer.
+\newblock {ARSyN: a method for the identification and removal
+of systematic noise in multifactorial time-course microarray experiments}.
+\newblock \emph{Biostatistics}, 13(3):553–566, 2012.
+
 \bibitem{Efron2001}
 B. Efron, R. Tibshirani, J.D. Storey, V. Tusher.
 \newblock {Empirical Bayes Analysis of a Microarray Experiment}.
-\newblock \emph{Journal of the American Statistical Association}.
+\newblock \emph{Journal of the American Statistical Association}, 2001.
 
 
 

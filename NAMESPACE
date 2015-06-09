@@ -1,10 +1,13 @@
 import(Biobase)
 import(methods)
+import(splines)
+import(Matrix)
 
 export("noiseq","noiseqbio","readData","addData","dat",
 	"rpkm","tmm","uqua","degenes",
-	"DE.plot", "filtered.data","QCreport")
+	"DE.plot", "filtered.data","QCreport",
+	"ARSyNseq","PCA.GENES")
 
-exportClasses("Output","Biodetection","CD","CountsBio","GCbias","lengthbias","Saturation")
+exportClasses("Output","Biodetection","CD","CountsBio","GCbias","lengthbias","Saturation","PCA")
 exportMethods("show", "explo.plot","dat2save")
 

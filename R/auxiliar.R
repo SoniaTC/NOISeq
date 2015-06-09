@@ -63,7 +63,8 @@ function (x, num = TRUE, k = 0) {
 
 sinceros <-
 function (datos, k) {
-  datos0 <- datos
+  datos = as.matrix(datos)
+  datos0 <- as.matrix(datos)
 
   if (is.null(k)) {
 

@@ -8,7 +8,7 @@ Quality Control report for expression data
 Generate a report with the exploratory plots for count data that can be generated from the biological information provided. This report is designed to compare two samples or two experimental conditions. 
 }
 \usage{
-QCreport(input, file = NULL, samples = NULL, factor = NULL)
+QCreport(input, file = NULL, samples = NULL, factor = NULL, norm = FALSE)
 }
 
 \arguments{
@@ -23,6 +23,9 @@ Vector with the two samples to be compared in the report when "factor" is NULL. 
 }
   \item{factor}{
 If NULL, individual samples indicated in "samples" are compared. Otherwise, it should be a string indicating the factor containing the experimental conditions to be compared in the report.
+}
+  \item{norm}{
+TRUE to indicate that data are already normalized.
 }
 }
 \value{

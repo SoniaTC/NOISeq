@@ -150,6 +150,7 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL, norm = FALSE) 
         
     resumen[[i]] = data.frame(c(paste("CPM >", cuentas), "depth"), mypersample, "total" = myglobal)
     colnames(resumen[[i]])[1] = names(resumen)[i]
+    colnames(resumen[[i]])[2:(ncol(resumen[[i]])-1)] = colnames(datosR)
                               
   }  
   
@@ -174,20 +175,29 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL, norm = FALSE) 
 
 ## PLOT: Mean length for detected genes Plot according to BIOTYPES
 
-countsbio.plot <- function (dat, samples = c(1,2), toplot = "global", plottype = c("barplot", "boxplot"),...) {
+countsbio.plot <- function (dat, samples = c(1,2), toplot = "global", 
+                            plottype = c("barplot", "boxplot"), toreport = FALSE,...) {
 
   # dat: Data coming from countsbio.dat function
   # samples: Samples to be plotted. If NULL, all samples are plotted.
   # toplot: Name of biotype (including "global") to be plotted.
 
+  mypar = par(no.readonly = TRUE)
+  
   ## Preparing data
-  if (is.null(samples)) { samples <- 1:NCOL(dat$result) }
+  if (is.null(samples)) { 
+    if (NCOL(dat$result) == 1) {
+      samples = 1
+    } else {
+      samples <- 1:NCOL(dat$result) 
+    }    
+  }
   if(is.numeric(toplot)) toplot = names(dat$summary)[toplot]
-  if (is.numeric(samples)) samples = colnames(dat$result)[samples]
+  if (is.numeric(samples) && !is.null(colnames(dat$result))) samples = colnames(dat$result)[samples]
   
   if (plottype == "barplot") {
     
-    if (!exists("ylab")) ylab = ""
+    if ((exists("ylab") && !is.character(ylab)) || !exists("ylab")) ylab = ""
     
     datos = dat$summary[[toplot]]
     mytotal = as.numeric(datos[,"total"])
@@ -227,13 +237,19 @@ countsbio.plot <- function (dat, samples = c(1,2), toplot = "global", plottype =
     if (is.numeric(samples)) colnames(conteos) = colnames(dat$result)[samples]
     else colnames(conteos) = samples
     num <- dat$bionum[toplot]
-    if (is.null(num)) num = 0
+    if (is.null(num)) {
+      if (toplot == "global") {
+        num = nrow(conteos)
+      } else {
+        num = 0
+      }
+    } 
     infobio = dat$biotypes
     
     if (num == 0 && toplot != "global") stop("Error: No data available. Please, change toplot parameter.")
     
     #if (!exists("ylim")) ylim = range(na.omit(log2(1+conteos)))
-    if (!exists("ylab")) ylab = "Expression values"
+    if ((exists("ylab") && !is.character(ylab)) || !exists("ylab")) ylab = "Expression values"
     
     ## Plots  
     
@@ -266,11 +282,10 @@ countsbio.plot <- function (dat, samples = c(1,2), toplot = "global", plottype =
     }
     
     axis(side = 2, at = escala$at, labels = escala$labels)
-    
-    par(mar = c(5, 4, 4, 4) + 0.1)        
-    
-  } 
+        
+  }
   
+  if (!toreport) par(mypar)  
   
 }
 

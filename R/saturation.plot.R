@@ -191,6 +191,7 @@ saturation.plot <- function(satdat, samples = NULL, toplot = 1,
   # colL, colR, mybg: A vector with as many colors as different samples to be plotted.
   #                   If NULL, default colors are used.
   
+  mypar = par(no.readonly = TRUE)
   
   # Parameters
   lwdL = 2
@@ -201,13 +202,17 @@ saturation.plot <- function(satdat, samples = NULL, toplot = 1,
   cex.main = cex.lab = cex.axis = 1
   cex = 0.8
   
+  
+  if (is.null(samples)) {
+    samples <- 1:length(sat)
+  }  
 
 
   # Preparing data
   sat <- satdat$saturation[[toplot]]
   depth <- satdat$depth
   num <- satdat$bionum[[toplot]]
-  new <- satdat$newdet[[toplot]]
+  nuevo <- satdat$newdet[[toplot]]
   real = satdat$real[[toplot]][samples,]
     
   
@@ -216,12 +221,7 @@ saturation.plot <- function(satdat, samples = NULL, toplot = 1,
   } else {
       main <- paste(toupper(toplot), " (", num, ")", sep = "")
   }
-    
 
-
-  if (is.null(samples)) {
-    samples <- 1:length(sat)
-  }
   
   legend = names(satdat$saturation[[1]])[samples]
   if (toreport) legend = samples
@@ -255,7 +255,7 @@ saturation.plot <- function(satdat, samples = NULL, toplot = 1,
   percen <- round(100*real[,"detec"]/num, 1)
 
 
-  # Drawing new detections bars?    
+  # Drawing new detections bars    
   if (length(samples) <= 2) {
     bars <- TRUE
   } else {
@@ -297,7 +297,7 @@ saturation.plot <- function(satdat, samples = NULL, toplot = 1,
 
     # yrightlim for plot.y2
     if (is.null(yrightlim)) {
-      yrightlim <- c(0, max(10,max(na.omit(unlist(new[samples])))))
+      yrightlim <- c(0, max(10,max(na.omit(unlist(nuevo[samples])))))
     }
     
     
@@ -309,13 +309,13 @@ saturation.plot <- function(satdat, samples = NULL, toplot = 1,
 
 
     # PLOT with 2 axis
-    plot.y2(x = depth[[samples[1]]]/10^6, yright = new[[samples[1]]],
+    plot.y2(x = depth[[samples[1]]]/10^6, yright = nuevo[[samples[1]]],
             yleft = sat[[samples[1]]], type = c("h", "o"),
             lwd = c(lwdR, lwdL), xlab = xlab, xlim = xlim,
             yrightlim = yrightlim, yleftlim = yleftlim,
             yylab = c(ylabR, ylabL), pch = c(1,21), col = c(colR[1],colL[1]),
             main = main, x2 = depth[[samples[2]]]/10^6,
-            yright2 = new[[samples[2]]], yleft2 = sat[[samples[2]]],
+            yright2 = nuevo[[samples[2]]], yleft2 = sat[[samples[2]]],
             col2 = c(colR[2],colL[2]), cex.main = cex.main, #bg = mybg,
             cex.lab = cex.lab, cex.axis = cex.axis, cex = cex, ...)
     
@@ -347,9 +347,8 @@ saturation.plot <- function(satdat, samples = NULL, toplot = 1,
              col = colR[2], cex = lwdR)
       text(1.24, -0.25, percen[2],adj=1)
     }
-    # Reset with the default values
-    par(mar = c(5, 4, 4, 4) + 0.1)
-    if (!toreport) layout(1)
+    # Reset with the default values    
+    if (!toreport) par(mypar); layout(1) 
     
   }
 }

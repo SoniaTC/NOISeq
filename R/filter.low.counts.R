@@ -15,7 +15,7 @@ CV = function(data) { 100 * sd(data, na.rm = TRUE) / mean(data, na.rm = TRUE) }
 
 ## Filtering out genes with low counts
 
-filtered.data = function(dataset, factor, norm = TRUE, depth = NULL, method = 1, cv.cutoff = 100, cpm = 1) {
+filtered.data = function(dataset, factor, norm = TRUE, depth = NULL, method = 1, cv.cutoff = 100, cpm = 1, p.adj = "fdr") {
   
   dataset0 = dataset[rowSums(dataset) > 0,]
   dataset = dataset0
@@ -56,6 +56,7 @@ filtered.data = function(dataset, factor, norm = TRUE, depth = NULL, method = 1,
       mytest = apply(datos, 1, 
                      function (x) { 
                        suppressWarnings(wilcox.test(x, alternative = "greater", conf.int=FALSE, mu = 0))$"p.value" })
+      mytest = p.adjust(mytest, method = p.adj)
       cumple = cbind(cumple, 1*(mytest < 0.05))  
     }    
     
@@ -64,7 +65,7 @@ filtered.data = function(dataset, factor, norm = TRUE, depth = NULL, method = 1,
       mytest = apply(datos, 1, 
                          function (x) suppressWarnings(prop.test(sum(x), n=sum(datos), p = p0,
                                                 alternative = "greater"))$"p.value")       
-      #miproptest = p.adjust(miproptest, method = "fdr")
+      mytest = p.adjust(mytest, method = p.adj)
       cumple = cbind(cumple, 1*(mytest < 0.05))           
     }
   }

@@ -6,6 +6,12 @@ tmm = function (datos, long = 1000, lc = 0, k = 0, refColumn = 1,
   
   # lc: Length correction. Expression is divided by long^lc. lc can be any real number.
   
+  if (!is.null(ncol(long))) {
+    mynames = long[,1]
+    long = long[,2]
+    names(long) = mynames
+  }
+  
   L <- (long/1000)^lc
   datos = datos/L
   
@@ -15,13 +21,13 @@ tmm = function (datos, long = 1000, lc = 0, k = 0, refColumn = 1,
   
   if (ncol(as.matrix(datos)) > 1) {
     
-    fk <- .calcNormFactors(as.matrix(datos), refColumn = refColumn,
+    fk <- .calcNormFactors(as.matrix(datos), refColumn = refColumn, method = "TMM",
                            logratioTrim = logratioTrim, sumTrim = sumTrim,
                            doWeighting = doWeighting, Acutoff = Acutoff)
           
-    fk = fk * total
+    fk = fk * (total/mean(total))
     
-    datos.norm <- t(t(datos0)/fk)*10^6
+    datos.norm <- t(t(datos0)/fk)
     
   } else {
     
@@ -38,6 +44,12 @@ tmm = function (datos, long = 1000, lc = 0, k = 0, refColumn = 1,
 
 
 rpkm <- function (datos, long = 1000, lc = 1, k = 0) {
+  
+  if (!is.null(ncol(long))) {
+    mynames = long[,1]
+    long = long[,2]
+    names(long) = mynames
+  }
 
   total <- colSums(as.matrix(datos))
 
@@ -55,6 +67,12 @@ rpkm <- function (datos, long = 1000, lc = 1, k = 0) {
 uqua <- function (datos, long = 1000, lc = 0, k = 0) {
   
 # lc: Length correction. Expression is divided by long^lc. lc can be any real number.
+  
+  if (!is.null(ncol(long))) {
+    mynames = long[,1]
+    long = long[,2]
+    names(long) = mynames
+  }
 
   L <- (long/1000)^lc
   datos = datos/L
