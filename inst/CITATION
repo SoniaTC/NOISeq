@@ -2,10 +2,22 @@ citEntry(
 	entry="article",
 	title="Differential expression in RNA-seq: a matter of depth",
 	author="Sonia Tarazona and Fernando Garcia-Alcalde and Joaquin Dopazo and Alberto Ferrer and Ana Conesa",
-	journal="Genome research",
+	journal="Genome Research",
 	volume=21,
 	number=12,
 	pages=2213--2223,
 	year=2011,
-	textVersion = "Tarazona, S., Garcia-Alcalde, F., Dopazo, J., Ferrer, A., & Conesa, A. (2011). Differential expression in RNA-seq: a matter of depth. Genome research, 21(12), 2213-2223."
+	textVersion = "Tarazona, S., Garcia-Alcalde, F., Dopazo, J., Ferrer, A., & Conesa, A. (2011). Differential expression in RNA-seq: a matter of depth. Genome Research, 21(12), 2213-2223."
+)
+
+citEntry(
+	entry="article",
+	title="Data quality aware analysis of differential expression in RNA-seq with NOISeq R/Bioc package",
+	author="Sonia Tarazona and Pedro Furio-Tari and David Turra and Antonio Di Pietro and Maria Jose Nueda and Alberto Ferrer and Ana Conesa",
+	journal="Nucleic Acids Research",
+	volume=,
+	number=,
+	pages=,
+	year=2015,
+	textVersion = "Tarazona, S., Furio-Tari, P., Turra, D., Di Pietro, A., Nueda, M.J., Ferrer, A., & Conesa, A. (2015). Data quality aware analysis of differential expression in RNA-seq with NOISeq R/Bioc package. Nucleic Acids Research."
 )

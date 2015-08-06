@@ -8,7 +8,8 @@ Differential expression method for technical replicates or no replicates at all
 \code{noiseq} computes differential expression between two experimental conditions from read count data (e.g. RNA-seq).
 }
 \usage{
-noiseq(input, k = 0.5, norm = c("rpkm","uqua","tmm","n"), replicates = c("technical","biological","no"), 
+noiseq(input, k = 0.5, norm = c("rpkm","uqua","tmm","n"), 
+replicates = c("technical","biological","no"), 
 factor=NULL, conditions=NULL, pnr = 0.2, nss = 5, v = 0.02, lc = 0)
 }
 
@@ -23,7 +24,7 @@ A string indicating the name of factor whose levels are the conditions to be com
 A vector containing the two conditions to be compared by the differential expression algorithm (needed when the \code{factor} contains more than 2 different conditions).
 }
 \item{replicates}{
-  In this argument, the type of replicates to be used is defined. Technical, biological or none. By default, technical replicates option is chosen.
+  In this argument, the type of replicates to be used is defined: "technical", "biological" or "no" replicates. By default, "technical" replicates option is chosen.
 }
   \item{k}{
 Counts equal to 0 are replaced by k. By default, k = 0.5.
@@ -66,12 +67,14 @@ Sonia Tarazona
 data(myCounts)
 
 ## Computing differential expression probability on RPKM-normalized data by NOISeq-real using factor "Tissue"
-mynoiseq = noiseq(mydata, k = 0.5, norm = "rpkm", replicates = "technical", factor="Tissue", pnr = 0.2, nss = 5, v = 0.02, lc = 1)
-
-
-## Computing differential expression probability on Upper Quartile normalized data by NOISeq-real using factor "TissueRun" and comparing samples in Run 1 (levels "Kidney_1" and "Liver_1")
-mynoiseq.uqua = noiseq(mydata, k = 0.5, norm = "uqua", replicates = "technical", factor="TissueRun", conditions = c("Kidney_1","Liver_1"), 
+mynoiseq = noiseq(mydata, k = 0.5, norm = "rpkm", replicates = "technical", factor="Tissue", 
 pnr = 0.2, nss = 5, v = 0.02, lc = 1)
+
+
+## Computing differential expression probability on Upper Quartile normalized data by NOISeq-real 
+## using factor "TissueRun" and comparing samples in Run 1 (levels "Kidney_1" and "Liver_1")
+mynoiseq.uqua = noiseq(mydata, k = 0.5, norm = "uqua", replicates = "technical", factor="TissueRun", 
+conditions = c("Kidney_1","Liver_1"), pnr = 0.2, nss = 5, v = 0.02, lc = 1)
 
 }
 

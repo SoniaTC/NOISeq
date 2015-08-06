@@ -35,7 +35,7 @@ DE.plot <- function (output, q = NULL, graphic = c("MD","expr","chrom","distr"),
       
       if(!is.null(q)) {
         mySelection = rownames(degenes(output,q))
-        points(output@results[[1]][mySelection,c("M","D")], col = col.sel, pch = pch.sel, cex = cex.sel)
+        points(output@results[[1]][mySelection,"M"], output@results[[1]][mySelection,"D"]+1, col = col.sel, pch = pch.sel, cex = cex.sel)
       }      
       
     }          

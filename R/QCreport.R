@@ -189,6 +189,10 @@ QCreport = function (input, file = NULL, samples = NULL, factor = NULL, norm = F
   text(lugares[2], empiezo, "Density plots of log fold changes (M) between pairs of samples.", adj = 0, font = 1, cex = 1)
   text(lugares[2], empiezo-bajo/2, "Confidence intervals for the median of M values.", adj = 0, font = 1, cex = 1)
 
+  empiezo = empiezo-bajo-0.3
+  text(lugares[1], empiezo, "Exploratory PCA", adj = 0, font = 2, cex = 1)
+  text(lugares[2], empiezo, "Principal Component Analysis score plots for PC1 vs PC2, and PC1 vs PC3.", adj = 0, font = 1, cex = 1)
+
   
   
   
@@ -629,12 +633,12 @@ QCreport = function (input, file = NULL, samples = NULL, factor = NULL, norm = F
   # Last page (for PCA)
   
   # Page 4
-  layout(matrix(c(1,1,2,3,4,4), nrow = 3, ncol = 2, byrow = TRUE), heights = c(10,40,45))
+  layout(matrix(c(1,1,2,3,4,4), nrow = 3, ncol = 2, byrow = TRUE), heights = c(30,40,40))
   
   par(mar = c(0,0,0,0))
   plot(1:10, 1:10, type = "n", axes = FALSE, xlab = "", ylab = "")
-  text(5,8, "Exploratory PCA", adj = 0.5, font = 4, cex = 1.5, col = "aquamarine4")
-  text(5,5, "Use this plot to see if samples are clustered according to the experimental design.", 
+  text(5,6, "Exploratory PCA", adj = 0.5, font = 2, cex = 2, col = "dodgerblue4")
+  text(5,4, "Use this plot to see if samples are clustered according to the experimental design.", 
        adj = 0.5, font = 1, cex = 1)
   text(5,3, "Use ARSyNseq function to correct potential batch effects.", adj = 0.5, font = 1, cex = 1)
   

@@ -44,11 +44,11 @@ allMD <- function (input, factor, conditions, k = 0.5, replicates, norm = "rpkm"
       if (length(levels(pData(input)[,i])) == 2) {
 
         if (!is.null(assayData(input)$exprs)) {
-          datos1 <- assayData(input)$exprs[,which(pData(input)[,i] ==levels(pData(input)[,i])[1])]
-          datos2 <- assayData(input)$exprs[,which(pData(input)[,i] ==levels(pData(input)[,i])[2])]
+          datos1 <- assayData(input)$exprs[,which(pData(input)[,i] ==levels(pData(input)[,i])[1]), drop = FALSE]
+          datos2 <- assayData(input)$exprs[,which(pData(input)[,i] ==levels(pData(input)[,i])[2]), drop = FALSE]
         } else {
-          datos1 <- assayData(input)$counts[,which(pData(input)[,i] ==levels(pData(input)[,i])[1])]
-          datos2 <- assayData(input)$counts[,which(pData(input)[,i] ==levels(pData(input)[,i])[2])]
+          datos1 <- assayData(input)$counts[,which(pData(input)[,i] ==levels(pData(input)[,i])[1]), drop = FALSE]
+          datos2 <- assayData(input)$counts[,which(pData(input)[,i] ==levels(pData(input)[,i])[2]), drop = FALSE]
         }
 
         # Define the comparison string
@@ -68,11 +68,11 @@ allMD <- function (input, factor, conditions, k = 0.5, replicates, norm = "rpkm"
         if (l[1] == TRUE && l[2] == TRUE) {
 
           if (!is.null(assayData(input)$exprs)) {
-            datos1 <- assayData(input)$exprs[,which(pData(input)[,i] == conditions[1])]
-            datos2 <- assayData(input)$exprs[,which(pData(input)[,i] == conditions[2])]
+            datos1 <- assayData(input)$exprs[,which(pData(input)[,i] == conditions[1]), drop = FALSE]
+            datos2 <- assayData(input)$exprs[,which(pData(input)[,i] == conditions[2]), drop = FALSE]
           } else {
-            datos1 <- assayData(input)$counts[,which(pData(input)[,i] == conditions[1])]
-            datos2 <- assayData(input)$counts[,which(pData(input)[,i] == conditions[2])]
+            datos1 <- assayData(input)$counts[,which(pData(input)[,i] == conditions[1]), drop = FALSE]
+            datos2 <- assayData(input)$counts[,which(pData(input)[,i] == conditions[2]), drop = FALSE]
           }                    
           # Define the comparison string
           comparison <- paste(conditions[1],conditions[2], sep=" - ")
@@ -221,6 +221,7 @@ allMD <- function (input, factor, conditions, k = 0.5, replicates, norm = "rpkm"
     dat.sim.norm <- vector("list", length = 2)
 
     datitos <- cbind(datos.sim[[1]], datos.sim[[2]])
+    rownames(datitos) = names(suma1)
 
     sumita <- rowSums(datitos)
     g.sin0 <- names(which(sumita > 0))
