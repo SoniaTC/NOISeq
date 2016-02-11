@@ -56,7 +56,7 @@ noiseqbio = function (input, k = 0.5, norm = c("rpkm","uqua","tmm","n"), nclust 
 
   
   # Z-scores for signal and noise
-  print("Computing Z values...")
+  cat("Computing Z values...\n")
   miMD <- allMDbio(input, factor, k = k, norm = norm, conditions = conditions, lc = lc, 
                    r = r, a0per = a0per, nclust = nclust, filter = filter, depth = depth,
                    cv.cutoff = cv.cutoff, cpm = cpm)
@@ -68,7 +68,7 @@ noiseqbio = function (input, k = 0.5, norm = c("rpkm","uqua","tmm","n"), nclust 
   
   ##### Probability of differential expression
   
-  print("Computing probability of differential expression...")
+  cat("Computing probability of differential expression...\n")
   
   
   ## KDE estimators of f0 and f  
@@ -98,7 +98,7 @@ noiseqbio = function (input, k = 0.5, norm = c("rpkm","uqua","tmm","n"), nclust 
   p0 <- min(1/f0.f, na.rm = TRUE)
   p0 = min(p0,1)
   
-  print(paste("p0 =", p0))
+  cat(paste("p0 =", p0)); cat("\n")
     
   
   ## PROBABILITY of DIFFERENTIAL EXPRESSION
@@ -108,7 +108,7 @@ noiseqbio = function (input, k = 0.5, norm = c("rpkm","uqua","tmm","n"), nclust 
   } 
   names(myprob) <- names(miMD$Zs)
   
-  print("Probability")
+  cat("Probability\n")
   print(summary(myprob))
        
   

@@ -22,7 +22,13 @@ function (data = NULL, factors = NULL, length = NULL, biotype = NULL, chromosome
   countData <- as.matrix( data )
 
   rowNames <- rownames(countData)
-  rownames(factors) <- colnames(countData)
+  
+  if (nrow(factors) == ncol(countData)) {
+    rownames(factors) <- colnames(countData)
+  } else {
+    stop ("Number of rows in factors must be equal to number of columns in data.\n")
+  }
+  
      
   pheno <- AnnotatedDataFrame(data=as.data.frame(factors))
 

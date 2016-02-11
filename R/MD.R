@@ -43,7 +43,7 @@ MDbio = function (dat = dat, selec = c(1:nrow(dat)), param = NULL, a0per = 0.9) 
   sd.M = sqrt(param$sd[,1]^2 / (dat[,1]^2 * log(2)^2 * param$n[1]) + 
                 param$sd[,2]^2 / (dat[,2]^2 * log(2)^2 * param$n[2]))
   
-  sd.D = sqrt(param$sd[,1]^2/sqrt(param$n[1]) + param$sd[,2]^2/sqrt(param$n[2]))
+  sd.D = sqrt(param$sd[,1]^2/param$n[1] + param$sd[,2]^2/param$n[2])
   
   if(is.null(a0per)) {
     a0.M = a0.D = 0

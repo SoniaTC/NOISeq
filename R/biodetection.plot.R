@@ -18,7 +18,7 @@ biodetection.dat <- function(input, factor = NULL, k = 0) {
   numgenes = nrow(dat)
   
   if (is.null(factor)) {  # per sample  
-    print("Biotypes detection is to be computed for:")
+    cat("Biotypes detection is to be computed for:\n")
     print(colnames(dat))
     biotablas = vector("list", length = NCOL(dat))
     names(biotablas) = colnames(dat)
@@ -26,7 +26,7 @@ biodetection.dat <- function(input, factor = NULL, k = 0) {
   } else {  # per condition
     mifactor = pData(input)[,factor]
     niveles = levels(mifactor)
-    print("Biotypes detection is to be computed for:")
+    cat("Biotypes detection is to be computed for:\n")
     print(niveles)
     biotablas = vector("list", length = length(niveles))
     names(biotablas) = niveles
@@ -43,11 +43,11 @@ biodetection.dat <- function(input, factor = NULL, k = 0) {
     
     detect <- dat[,i] > k
     
-    perdet1 <- genome*table(infobio, detect)[names(genome),2]/
+    perdet1 <- genome*table(infobio, detect)[names(genome),"TRUE"]/
       table(infobio)[names(genome)]
     
-    perdet2 <- 100*table(infobio, detect)[names(genome),2] /
-      sum(table(infobio, detect)[,2])    
+    perdet2 <- 100*table(infobio, detect)[names(genome),"TRUE"] /
+      sum(table(infobio, detect)[,"TRUE"])    
     
     biotablas[[i]] <- as.matrix(rbind(perdet1[ordre], perdet2[ordre]))
     rownames(biotablas[[i]]) <- c("detectionVSgenome", "detectionVSsample")    

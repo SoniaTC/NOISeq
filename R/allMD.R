@@ -518,7 +518,7 @@ allMDbio = function (input, factor, conditions, k = 0.5, norm = "rpkm", lc = 1,
   
   Zr = NULL
   
-  if (n1+n2 <= 8) {  # sharing information within clusters
+  if (n1+n2 <= 9) {  # sharing information within clusters
     
     Zr = share.info(mydata = datos.filt, n1 = n1, n2 = n2, r = r, nclust = nclust)
     

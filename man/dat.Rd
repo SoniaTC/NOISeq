@@ -53,7 +53,7 @@ Sonia Tarazona
 
 
 \seealso{
-       \code{\link{Biodetection}},\code{\link{CD}},\code{\link{CountsBio}},\code{\link{GCbias}},\code{\link{lengthbias}},\code{\link{Saturation}},\code{\link{readData}},\code{\link{addData}},\code{dat2save},\code{explo.plot}
+       \code{\link{Biodetection}},\code{\link{CD}},\code{\link{CountsBio}},\code{\link{GCbias}},\code{\link{lengthbias}},\code{\link{Saturation}},\code{\link{PCA}},\code{\link{readData}},\code{\link{addData}},\code{\link{dat2save}},\code{\link{explo.plot}}
      }
 
 \examples{

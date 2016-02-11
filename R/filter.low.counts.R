@@ -34,7 +34,7 @@ filtered.data = function(dataset, factor, norm = TRUE, depth = NULL, method = 1,
   grupos = unique(factor)
   cumple = NULL
   
-  print("Filtering out low count features...")
+  cat("Filtering out low count features...\n")
   
   for (gg in grupos) {    
     datos = as.matrix(dataset[, grep(gg, factor)])
@@ -72,7 +72,7 @@ filtered.data = function(dataset, factor, norm = TRUE, depth = NULL, method = 1,
   
   cumple = which(rowSums(as.matrix(cumple)) >= 1) 
   
-  print(paste(length(cumple), "features are to be kept for differential expression analysis with filtering method", method))
+  cat(paste(length(cumple), "features are to be kept for differential expression analysis with filtering method", method)); cat("\n")
   
   dataset0[cumple,]
   

@@ -1,3 +1,9 @@
+version 2.16.0 (2016-02-11)
+- NOISeqBIO has been modified when few replicates are available and the computation time has been drastically removed.  
+- Gene clustering in NOISeqBIO when few replicates are available: It will be done when total number of samples is 9 or less (instead of 10 or less).
+- Fixed a bug in "biotype detection" plot. It failed when none of the genes in the sample had values = 0.
+- Corrected an error in the calculation of standard deviation of D statistic in NOISeqBIO.
+
 version 2.14.0 (2015-08-05)
  - Fixed a bug in "MD" plot
  - Fixed a bug in NOISeq-sim (i.e. noiseq function for no replicates)

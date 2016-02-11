@@ -31,7 +31,7 @@
 Mar\'{i}a Jos\'{e} Nueda (\texttt{mj.nueda@ua.es})\\Alberto Ferrer (\texttt{aferrer@eio.upv.es})\\Ana Conesa (\texttt{aconesa@cipf.es})}
 % Please increment date when working on this document, so that
 % date shows genuine change date, not merely date of compile.
-\date{5 August 2015 \\(Version 2.14.0)}
+\date{11 February 2016 \\(Version 2.16.0)}
 \maketitle
 
 
@@ -51,7 +51,7 @@ for analyzing count data coming from next generation sequencing technologies.
 
 First, we describe the input data format. Next, we illustrate the utilities to explore the quality of the count data: saturation, biases, 
 contamination, etc. and show the normalization, filtering and batch correction methods included in the package. Finally, we explain how to compute differential 
-expression between two experimental conditions. The differential expression method \noiseq{} and some of the plots included in the package were displayed in \cite{tarazona2011}.The new version of \noiseq{} for biological replicates (\noiseqbio{}) is also implemented in the package.
+expression between two experimental conditions. The differential expression method \noiseq{} and some of the plots included in the package were displayed in \cite{tarazona2011,tarazona2015}.The new version of \noiseq{} for biological replicates (\noiseqbio{}) is also implemented in the package.
 
 The \noiseq{} and \noiseqbio{} methods are data-adaptive and nonparametric. 
 Therefore, no distributional assumptions need to be done for the data
@@ -699,7 +699,7 @@ explo.plot(myPCA, factor = "batch")
 \section{Differential expression}
 
 The \noiseq{} package computes differential expression between two experimental conditions given the expression level of the considered features. 
-The package includes two non-parametric approaches for differential expression analysis: \noiseq{} for technical replicates or no replication at all, and \noiseqbio{}, which is optimized for the use of biological replicates. 
+The package includes two non-parametric approaches for differential expression analysis: \noiseq{} \cite{tarazona2011} for technical replicates or no replication at all, and \noiseqbio{} \cite{tarazona2015}, which is optimized for the use of biological replicates. 
 Both methods take read counts from RNA-seq as the expression values, in addition to previously normalized data and
 read counts from other NGS technologies.
 
@@ -861,12 +861,12 @@ to the \emph{a posteriori} probability $p_0(z) = 1 - p_1(z)$ we are calculating.
 \end{enumerate}
 
 When too few replicates are available for each condition, the null distribution is very poor since the number of different permutations is
-low. For those cases (number of replicates per condition less than 5), it is convenient to borrow information across genes. Our proposal
+low. For those cases (number of replicates in one of the conditions less than 5), it is convenient to borrow information across genes. Our proposal
 consists of clustering all genes according to their
-expression values across replicates using the k-means method. For each cluster  $k$ of genes, we considered the expression values of all the
-genes in the cluster  as observations within the corresponding condition (replicates) and then we shuffled this submatrix $r \times g_k$
-times, where $g_k$ is the number of genes within cluster $k$. For each permutation, we calculated $M$ and $D$ values and their
-corresponding standard errors. In order to reduce the computing time, if $g_k \geq 1000$, we again subdivided cluster $k$ in subclusters
+expression values across replicates using the k-means method. For each cluster  $k$ of genes, we consider the expression values of all the
+genes in the cluster as observations within the corresponding condition (replicates) and then we shuffle this submatrix $r \times g_k$
+times, where $g_k$ is the number of genes within cluster $k$. If $r \times g_k$ is higher than 1000, we compute 1000 permutations in that cluster.  For each permutation, we calculate $M$ and $D$ values and their
+corresponding standard errors. In order to reduce the computing time, if $g_k \geq 1000$, we again subdivide cluster $k$ in subclusters
 with k-means algorithm.
 
 We will consider that Marioni's data have biological replicates for the following example. In this case, the method 2 (Wilcoxon test) to filter low counts
@@ -1091,6 +1091,11 @@ sessionInfo()
 S. Tarazona, F. Garc\'{\i}a-Alcalde, J. Dopazo, A. Ferrer, and A. Conesa.
 \newblock {Differential expression in RNA-seq: A matter of depth}.
 \newblock \emph{Genome Research}, 21: 2213 - 2223, 2011.
+
+\bibitem{tarazona2015}
+S. Tarazona, P. Furi\'{o}-Tar\'{i}, D. Turr\'{a}, A. Di Pietro, M.J. Nueda, A. Ferrer, and A. Conesa.
+\newblock {Data quality aware analysis of differential expression in RNA-seq with NOISeq R/Bioc package}.
+\newblock \emph{Nucleic Acids Research}, 43(21):e140, 2015.
 
 \bibitem{marioni2008}
 J.C. Marioni, C.E. Mason, S.M. Mane, M. Stephens, and Y. Gilad.

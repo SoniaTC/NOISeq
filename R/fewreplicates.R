@@ -18,9 +18,8 @@ share.info = function (mydata, n1, n2, r, nclust)   {
   gc()
   cl = suppressWarnings(kmeans(mydata, nclust, nstart = 25, iter.max = nclust + 30))
 
-  
-  print("k-means clustering done")
-  print(paste("Size of", nclust, "clusters:"))
+  cat("...k-means clustering done\n")
+  cat(paste("Size of", nclust, "clusters:\n"))
   print(cl$size)
             
   # Creating pseudo-data
@@ -28,8 +27,9 @@ share.info = function (mydata, n1, n2, r, nclust)   {
     
   # Resampling
   npermu = cl$size * r
+  npermu = sapply(npermu, function (x) min(x, 1000))  ## modified to reduce the number of permutations to be done
   
-  print("Resampling cluster...")
+  cat("Resampling cluster...")
   
   myres = vector("list", length = nclust)
   
@@ -67,11 +67,12 @@ share.info = function (mydata, n1, n2, r, nclust)   {
 #       Option 2.D: clustering big clusters
       cl2 = kmeans(cluster.data[[i]], nclust, nstart = 25, iter.max = nclust + 20)
       
-      print(paste("Size of", nclust, "clusters of subcluster:", i))
+      cat(paste("Size of", nclust, "subclusters of cluster:", i)); cat("\n")
       print(cl2$size)
       subcluster.data = lapply(1:nclust, function (k) { cluster.data[[i]][cl2$cluster == k,] })
       
       npermu2 = cl2$size * r
+      npermu2 = sapply(npermu2, function (x) min(x, 1000))  ## modified to reduce the number of permutations to be done
       myres2 = vector("list", length = nclust)
       
       for (h in 1:nclust) {
@@ -103,7 +104,7 @@ share.info = function (mydata, n1, n2, r, nclust)   {
 
   
   # Computing Zr for noise 
-  print("Computing Z for noise...")
+  cat("Computing Z for noise...\n")
   
   # 4.A) a0: Global for all R*G permutations
   myres = do.call("rbind", myres)
