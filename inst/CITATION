@@ -17,7 +17,7 @@ citEntry(
 	journal="Nucleic Acids Research",
 	volume=43,
 	number=21,
-	pages=e140,
+	pages="e140",
 	year=2015,
 	textVersion = "Tarazona, S., Furio-Tari, P., Turra, D., Di Pietro, A., Nueda, M.J., Ferrer, A., & Conesa, A. (2015). Data quality aware analysis of differential expression in RNA-seq with NOISeq R/Bioc package. Nucleic Acids Research."
 )
