@@ -69,7 +69,7 @@ biodetection.dat <- function(input, factor = NULL, k = 0) {
 
 
 
-biodetection.plot <- function(dat, samples = c(1,2), plottype = c("persample", "comparison"), 
+biodetection.plot <- function(dat, samples = c(1,2), plottype = "persample", 
                               toplot = "protein_coding", toreport = FALSE,...) {  
   
   mypar = par(no.readonly = TRUE)

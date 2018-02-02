@@ -154,7 +154,8 @@ GC.dat <- function (input, factor = NULL, norm = FALSE)  {
   
   datos = GCexpr[[1]]
   GCcont = datos[,1]  
-  knots =  c(rep(GCcont[1],3), seq(GCcont[1], GCcont[length(GCcont)-1], length.out=round(length(GCcont)/10, 0)), 
+  knots =  c(rep(GCcont[1],3), seq(GCcont[1], GCcont[length(GCcont)-1], 
+                                   length.out=round(length(GCcont)/10, 0)), 
              rep(GCcont[length(GCcont)], 4))
   bx = splineDesign (knots, GCcont, outer.ok = TRUE)
   

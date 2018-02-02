@@ -17,7 +17,7 @@ ARSyNseq(data, factor = NULL, batch = FALSE, norm = "rpkm", logtransf = FALSE, V
   
   \item{factor}{Name of the factor (as it was given to the \emph{readData} function) to be used in the ARSyN model (e.g. the factor containing the batch information). When it is NULL, all the factors are considered.}
   
-  \item{batch}{TRUE to indicate that the \emph{factor} argument indicates the batch information. In this case, the \emph{factor} argument must be used to specify the names of the onlu factor containing the information of the batch.}
+  \item{batch}{TRUE to indicate that the \emph{factor} argument indicates the batch information. In this case, the \emph{factor} argument must be used to specify the names of the only factor containing the information of the batch.}
   
   \item{norm}{Type of normalization to be used. One of ``rpkm'' (default), ``uqua'', ``tmm'' or ``n'' (if data are already normalized). If length was provided through the \emph{readData} function, it will be considered for the normalization (except for ``n''). Please note that if a normalization method if used, the arguments \emph{lc} and  \emph{k} are set to 1 and 0 respectively.}
   

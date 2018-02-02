@@ -20,7 +20,7 @@ if(Factors==2)
 {
   Fac0<-c(1,2,2,2)
   names(Fac0)<-c("Model.a","Model.b","Model.ab","Model.res")
-  if(Join){ names(Fac0)[3]<-c("Model.bab")}
+  if(Join[1]){ names(Fac0)[3]<-c("Model.bab")}
   asca0<- ASCA.2f(X=X, Designa=Designa, Designb=Designb,Fac=Fac0,Join=Join,Interaction=Interaction)
   Fac<-ARSyNcomponents(asca0,Variability=Variability,beta=beta)
   for (i in 1:length(Fac)){
