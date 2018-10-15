@@ -37,7 +37,7 @@ Sonia Tarazona
 
 
 \seealso{
-       \code{\link{Biodetection}},\code{\link{CD}},\code{\link{CountsBio}},\code{\link{GCbias}},\code{\link{lengthbias}},\code{\link{Saturation}}, \code{\link{readData}}, \code{\link{addData}}, \code{\link{dat}}.
+       \code{\link{Biodetection}},\code{\link{CD}},\code{\link{CountsBio}},\code{\link{GCbias}},\code{\link{lengthbias}},\code{\link{Saturation}}, \code{\link{PCA}}, \code{\link{readData}}, \code{\link{addData}}, \code{\link{dat}}.
      }
 
 \examples{

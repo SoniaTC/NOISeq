@@ -31,7 +31,7 @@
 Mar\'{i}a Jos\'{e} Nueda (\texttt{mj.nueda@ua.es})\\Alberto Ferrer (\texttt{aferrer@eio.upv.es})\\Ana Conesa (\texttt{aconesa@cipf.es})}
 % Please increment date when working on this document, so that
 % date shows genuine change date, not merely date of compile.
-\date{11 February 2016 \\(Version 2.16.0)}
+\date{11 February 2016 \\(Version 2.14.1)}
 \maketitle
 
 
@@ -236,7 +236,7 @@ We have grouped the exploratory plots in three categories according to the diffe
 Are there too many features with low counts? Are the samples very different regarding the expression quantification?
  \item \textbf{Sequencing bias detection}: Should the expression values be corrected for the length or the GC content bias? 
 Should a normalization procedure be applied to account for the differences among RNA composition among samples?
- \item \textbf{Batch effect exploration}: Are the samples clustered in corcondance with the experimental design or with the batch in which they were processed? 
+ \item \textbf{Batch effect exploration}: Are the samples clustered in concordance with the experimental design or with the batch in which they were processed? 
 \end{itemize}
 
 
@@ -511,9 +511,13 @@ In the plot can be seen that the $M$ median is deviated from 0 in most of the ca
 % \clearpage
 
 
-\subsection{Batch effect exploration} \label{sec_PCA}
+\subsection{PCA exploration} \label{sec_PCA}
 
 One of the techniques that can be used to visualize if the experimental samples are clustered according to the experimental design or if there is an unwanted source of noise in the data that hampers this clustering is the Principal Component Analysis (PCA).
+
+PCA is a dimension reduction method that does not require any distributional assumption, but it usually works better if data distribution is not too skewed, as happens in RNA-seq data. This is why, NOISeq package log-tranforms the expression data when users indicate that they have not already been log-tranformed. 
+
+NOISeq PCA function allows to plot the loading values, that is, the projection of the genes on the new principal components, or the scores, which are the projections of the samples (observations) on the space created by the new componets. 
 
 To illustrate the utility of the PCA plots, we took Marioni's data and artificially added a batch effect to the first four samples that would belong then to bath 1. The rest of samples would belong to batch2, so we also create an additional factor to collect the batch information.
 

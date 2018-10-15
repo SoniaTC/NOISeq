@@ -69,10 +69,12 @@ biodetection.dat <- function(input, factor = NULL, k = 0) {
 
 
 
-biodetection.plot <- function(dat, samples = c(1,2), plottype = "persample", 
+biodetection.plot <- function(dat, samples = c(1,2), plottype = c("persample", "comparison"), 
                               toplot = "protein_coding", toreport = FALSE,...) {  
   
   mypar = par(no.readonly = TRUE)
+  
+  plottype = match.arg(plottype)
 
   if (length(samples) > 2) {
     stop("ERROR: This function cannot generate plots for more than 2 samples.\n 
