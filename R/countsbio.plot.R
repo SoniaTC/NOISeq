@@ -183,6 +183,7 @@ countsbio.plot <- function (dat, samples = c(1,2), toplot = "global",
   # toplot: Name of biotype (including "global") to be plotted.
 
   mypar = par(no.readonly = TRUE)
+  plottype = match.arg(plottype)
   
   ## Preparing data
   if (is.null(samples)) { 
