@@ -2,7 +2,7 @@ Package: NOISeq
 Type: Package
 Title: Exploratory analysis and differential expression for RNA-seq
         data
-Version: 2.25.1
+Version: 2.26.0
 Date: 2014-02-24
 Author: Sonia Tarazona, Pedro Furio-Tari, Maria Jose Nueda, Alberto Ferrer and Ana Conesa
 Maintainer: Sonia Tarazona <starazona@cipf.es>
