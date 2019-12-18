@@ -43,12 +43,12 @@ GC.dat <- function (input, factor = NULL, norm = FALSE)  {
     if (norm) {
       datos = sapply(niveles, 
                      function (k) {
-                       rowMeans(as.matrix(datos[,grep(k, mifactor)]))
+                       rowMeans(as.matrix(datos[, mifactor == k]))
                      })    
     } else {
       datos = sapply(niveles, 
                      function (k) {
-                       rowMeans(t(10^6*t(datos[,grep(k, mifactor)])/colSums(as.matrix(datos[,grep(k, mifactor)]))))                     
+                       rowMeans(t(10^6*t(datos[, mifactor == k])/colSums(as.matrix(datos[, mifactor == k]))))                     
                      })    
     } 
     colnames(datos) = niveles

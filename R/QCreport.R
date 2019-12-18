@@ -230,10 +230,10 @@ QCreport = function (input, file = NULL, samples = NULL, factor = NULL, norm = F
                     yleftlim = c(0,unlist(QCinfo$data$saturation$bionum[1])), toreport = TRUE)    
   } else {   # FACTOR
     par(mar = c(5.1,4.1,4.1,2.1))
-    saturation.plot(QCinfo$data$saturation, samples = samples2[grep(niveles[1], myfactor)], 
+    saturation.plot(QCinfo$data$saturation, samples = samples2[myfactor == niveles[1]], 
                     toplot = 1, toreport = TRUE, 
                     yleftlim = c(0,unlist(QCinfo$data$saturation$bionum[1])), )
-    if (length(grep(niveles[1], myfactor)) > 2) {
+    if (sum(myfactor == niveles[1]) > 2) {
       par(mar = c(0,0,0,0))
       plot(1:10, 1:10, type = "n", axes = FALSE, xlab = "", ylab = "")
     }    
@@ -249,9 +249,9 @@ QCreport = function (input, file = NULL, samples = NULL, factor = NULL, norm = F
     plot(1:10, 1:10, type = "n", axes = FALSE, xlab = "", ylab = "")
     
   } else {  # FACTOR
-    saturation.plot(QCinfo$data$saturation, samples = samples2[grep(niveles[2], myfactor)], 
+    saturation.plot(QCinfo$data$saturation, samples = samples2[mifactor == niveles[2]], 
                     toplot = 1, yleftlim = c(0,unlist(QCinfo$data$saturation$bionum[1])), toreport = TRUE)
-    if (length(grep(niveles[2], myfactor)) > 2) {
+    if (sum(myfactor == niveles[2]) > 2) {
       par(mar = c(0,0,0,0))
       plot(1:10, 1:10, type = "n", axes = FALSE, xlab = "", ylab = "")
     }  

@@ -16,7 +16,6 @@ CV = function(data) { 100 * sd(data, na.rm = TRUE) / mean(data, na.rm = TRUE) }
 ## Filtering out genes with low counts
 
 filtered.data = function(dataset, factor, norm = TRUE, depth = NULL, method = 1, cv.cutoff = 100, cpm = 1, p.adj = "fdr") {
-  
   dataset0 = dataset[rowSums(dataset) > 0,]
   dataset = dataset0
   
@@ -37,7 +36,7 @@ filtered.data = function(dataset, factor, norm = TRUE, depth = NULL, method = 1,
   cat("Filtering out low count features...\n")
   
   for (gg in grupos) {    
-    datos = as.matrix(dataset[, grep(gg, factor)])
+    datos = as.matrix(dataset[, factor == gg])
     
     if (method == 1) {
       

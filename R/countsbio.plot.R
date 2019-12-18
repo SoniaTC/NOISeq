@@ -52,25 +52,25 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL, norm = FALSE) 
     if (norm) {
       datos = sapply(niveles, 
                      function (k) { 
-                       rowMeans(as.matrix(datos[,grep(k, mifactor)]))
+                       rowMeans(as.matrix(datos[, mifactor == k]))
                      })
       datos0 = sapply(niveles, 
                       function (k) { 
-                        rowMeans(as.matrix(datos0[,grep(k, mifactor)]))
+                        rowMeans(as.matrix(datos0[, mifactor == k]))
                       })
       
     } else {
       datos = sapply(niveles, 
                      function (k) { 
-                       10^6 * rowMeans(t(t(datos[,grep(k, mifactor)])/colSums(as.matrix(datos[,grep(k, mifactor)]))))
+                       10^6 * rowMeans(t(t(datos[, mifactor == k])/colSums(as.matrix(datos[, mifactor == k]))))
                      })
       datos0 = sapply(niveles, 
                       function (k) { 
-                        10^6 * rowMeans(t(t(datos0[,grep(k, mifactor)])/colSums(as.matrix(datos0[,grep(k, mifactor)]))))
+                        10^6 * rowMeans(t(t(datos0[, mifactor == k])/colSums(as.matrix(datos0[, mifactor == k]))))
                       })      
     }
     colnames(datos) = colnames(datos0) = niveles
-    depth = sapply(niveles, function (k) paste(range(depth[grep(k, mifactor)]), collapse = "-"))
+    depth = sapply(niveles, function (k) paste(range(depth[mifactor == k]), collapse = "-"))
   }
   
   

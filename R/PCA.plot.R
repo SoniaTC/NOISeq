@@ -101,7 +101,7 @@ PCA.plot <- function (dat, samples = c(1,2), plottype = "scores", factor = NULL)
          ylim = range(data2plot$scores[,samples]) + 0.02*rango*c(-1,1))    
     
     points(data2plot$scores[,samples[1]], data2plot$scores[,samples[2]],
-           pch = pch, col = col, cex = 1.3) 
+           pch = pch, col = col, cex = 2.3) 
     
     legend("topleft", condis, pch = parapintar[,"pch"], col = parapintar[,"col"], bty = "n")        
   } 

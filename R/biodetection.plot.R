@@ -30,7 +30,7 @@ biodetection.dat <- function(input, factor = NULL, k = 0) {
     print(niveles)
     biotablas = vector("list", length = length(niveles))
     names(biotablas) = niveles
-    dat = sapply(niveles, function (k) rowSums(as.matrix(dat[,grep(k, mifactor)])))
+    dat = sapply(niveles, function (k) rowSums(as.matrix(dat[, mifactor == k])))
   }
   
     
