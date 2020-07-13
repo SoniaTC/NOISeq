@@ -35,7 +35,7 @@ GC.dat <- function (input, factor = NULL, norm = FALSE)  {
     print(colnames(datos))
     
   } else {  # per condition
-    mifactor = pData(input)[,factor]
+    mifactor = as.factor(pData(input)[,factor])
     niveles = levels(mifactor)
     print("GC content bias detection is to be computed for:")
     print(niveles)
@@ -110,6 +110,7 @@ GC.dat <- function (input, factor = NULL, norm = FALSE)  {
       miclasi = cut(GC, breaks = misbins, labels = FALSE)
       misbins = sapply(1:numbins, function (i) mean(misbins[i:(i+1)]))
       miclasi = misbins[miclasi]
+      
       GCexpr[[i]] = aggregate(datos, by = list("GCbin" = miclasi), mean, trim = 0.025)      
       
     } else {  # PER BIOTYPE

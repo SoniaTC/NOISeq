@@ -24,7 +24,7 @@ biodetection.dat <- function(input, factor = NULL, k = 0) {
     names(biotablas) = colnames(dat)
     
   } else {  # per condition
-    mifactor = pData(input)[,factor]
+    mifactor = as.factor(pData(input)[,factor])
     niveles = levels(mifactor)
     cat("Biotypes detection is to be computed for:\n")
     print(niveles)

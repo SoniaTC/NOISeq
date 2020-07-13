@@ -83,7 +83,7 @@ QCreport = function (input, file = NULL, samples = NULL, factor = NULL, norm = F
     
   # FACTOR  
   } else {    
-    myfactor = pData(input)[,factor]
+    myfactor = as.factor(pData(input)[,factor])
     niveles = as.character(unique(myfactor))
     
     if (length(niveles) > 2) {  # more than two levels
@@ -249,7 +249,7 @@ QCreport = function (input, file = NULL, samples = NULL, factor = NULL, norm = F
     plot(1:10, 1:10, type = "n", axes = FALSE, xlab = "", ylab = "")
     
   } else {  # FACTOR
-    saturation.plot(QCinfo$data$saturation, samples = samples2[mifactor == niveles[2]], 
+    saturation.plot(QCinfo$data$saturation, samples = samples2[myfactor == niveles[2]], 
                     toplot = 1, yleftlim = c(0,unlist(QCinfo$data$saturation$bionum[1])), toreport = TRUE)
     if (sum(myfactor == niveles[2]) > 2) {
       par(mar = c(0,0,0,0))

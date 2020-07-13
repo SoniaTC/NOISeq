@@ -44,7 +44,7 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL, norm = FALSE) 
     print(colnames(datos))
     
   } else {  # per condition
-    mifactor = pData(input)[,factor]
+    mifactor = as.factor(pData(input)[,factor])
     niveles = levels(mifactor)
     print("Counts per million distributions are to be computed for:")
     print(niveles)
