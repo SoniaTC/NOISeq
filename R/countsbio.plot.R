@@ -125,15 +125,15 @@ countsbio.dat <- function (input, biotypes = NULL, factor = NULL, norm = FALSE) 
       datosR = datosCPM       
     } else {       
       if(!is.null(infobio)) {
-        datosR = datosCPM[which(infobio == names(resumen)[i]),]
-        if (class(datosR) !=  "matrix") { datosR = t(as.matrix(datosR)) } 
+        datosR = datosCPM[which(infobio == names(resumen)[i]),,drop = FALSE]
+        # if (class(datosR) !=  "matrix") { datosR = t(as.matrix(datosR)) } 
       }
     }
     
     
     nfeatures = nrow(datosR)
-    datosR = datosR[which(rowSums(datosR) > 0),] 
-    if (class(datosR) !=  "matrix") { datosR = t(as.matrix(datosR)) }
+    datosR = datosR[which(rowSums(datosR) > 0),,drop = FALSE] 
+    # if (class(datosR) !=  "matrix") { datosR = t(as.matrix(datosR)) }
     
     myglobal = NULL
     mypersample = NULL
